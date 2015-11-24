@@ -49,7 +49,7 @@ def leitura():
 
         contador = 0
         cont_harq = 0
-        while contador<=99:
+        while contador<=999:
             leitor, recebe = udp.recvfrom(65535)
             msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
             if msg_Id is 133:
@@ -66,8 +66,8 @@ def leitura():
                     if (harq_tb1 is not 1):
                         cont_harq +=1
 
-                    if (contador==100):
-                        valor_plot=cont_harq
+                    if (contador==1000):
+                        valor_plot=cont_harq/10
                         flag=True
                         #print valor_plot
                     else:
@@ -94,7 +94,6 @@ class Packing(Tkinter.Frame):
         self.initUI2()
 ################################################################################
 ################################################################################
-
 ################################################################################
 #                               Criacao da UI                                  #
 ################################################################################
@@ -111,28 +110,28 @@ class Packing(Tkinter.Frame):
         packagesMenu=Menu(menubar)
         ########################################################################
         menubar.add_cascade(label="File",underline=0, menu=fileMenu)
-        fileMenu.add_command(label="Encontrar UE", underline=10)
-        fileMenu.add_separator()
+        #fileMenu.add_command(label="Encontrar UE", underline=10)
+        #fileMenu.add_separator()
         fileMenu.add_command(label="Plotar", underline=0, command=self.thread_init)
         fileMenu.add_separator()
-        fileMenu.add_command(label="Salvar", underline=0)
-        fileMenu.add_command(label="Salvar como", underline=1)
-        fileMenu.add_separator()
+        #fileMenu.add_command(label="Salvar", underline=0)
+        #fileMenu.add_command(label="Salvar como", underline=1)
+        #fileMenu.add_separator()
         fileMenu.add_command(label="Exit", underline=0, command=self.onExit)
         ########################################################################
         submenu=Menu(fileMenu)
-        menubar.add_cascade(label="Edit",underline=0,menu=editMenu)
-        editMenu.add_cascade(label="Adicionar UE's", menu=submenu, underline=0)
-        submenu.add_command(label="UE")
+        #menubar.add_cascade(label="Edit",underline=0,menu=editMenu)
+        #editMenu.add_cascade(label="Adicionar UE's", menu=submenu, underline=0)
+        #submenu.add_command(label="UE")
         ########################################################################
-        viewMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="View",underline=0,menu=viewMenu)
+        #viewMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="View",underline=0,menu=viewMenu)
         ########################################################################
-        findMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="Find",underline=0,menu=findMenu)
+        #findMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="Find",underline=0,menu=findMenu)
         ########################################################################
-        packagesMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
+        #packagesMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
         ########################################################################
         helpMenu.add_command(label="About Program of Plot", underline=0)
         menubar.add_cascade(label="Help",underline=0, menu=helpMenu)
@@ -147,8 +146,8 @@ class Packing(Tkinter.Frame):
         self.b3=Button(frame, text='Plotar Grafico',width=10, command=self.thread_init)
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
-        self.b1.pack()
-        self.b2.pack()
+        #self.b1.pack()
+        #self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
@@ -186,7 +185,7 @@ class Packing(Tkinter.Frame):
         ax.set_title("RealTime plot FAPI - BLER INDICATION")
         ax.set_xlabel("Time")
         ax.set_ylabel("Amplitude")
-        ax.axis([0,2000,0,100])
+        ax.axis([0,1000,0,50])
         line, = pylab.plot(lista)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
