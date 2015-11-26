@@ -49,25 +49,26 @@ def leitura():
 
         contador = 0
         cont_harq = 0
-        while contador<=999:
+        while contador<=99:
             leitor, recebe = udp.recvfrom(65535)
-            msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
+            msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
+            #print msg_Id
             if msg_Id is 133:
+                #print msg_Id
                 try:
-                    msg_Id,len_Ven,buff_Length,sub_Frame, num_of_harq, rnti, harq_tb1, harq_tb2=unpack('>BBHHHHBB', leitor[0:12])
+                    msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
                     ############################################################
                     ######### ----configuracoes de descompacta----- ############
-                    #Sfn=int(sub_Frame) >> 4
-                    #Sf=int(sub_Frame) & 0xF
-                    #valor_plot[contador]=ul_cqi#(ul_cqi-128)/2
+                    Sfn=int(Frame) >> 4
+                    Sf=int(Frame) & 0xF
 
-                    #print harq_tb1
                     contador+=1
+
                     if (harq_tb1 is not 1):
                         cont_harq +=1
 
-                    if (contador==1000):
-                        valor_plot=cont_harq/10
+                    if (contador==100):
+                        valor_plot=cont_harq/1
                         flag=True
                         #print valor_plot
                     else:
