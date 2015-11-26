@@ -185,7 +185,7 @@ class Packing(Tkinter.Frame):
         ax.set_title("RealTime plot FAPI - BLER INDICATION")
         ax.set_xlabel("Time")
         ax.set_ylabel("Amplitude")
-        ax.axis([0,1000,0,50])
+        ax.axis([0,1000,0,100])
         line, = pylab.plot(lista)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
