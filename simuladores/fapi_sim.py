@@ -24,7 +24,7 @@ def conect(local):
                     frame = (sub_frame & 0x0F) | (sys_frame_n << 4)
 
                     msg_Id = 0x85
-                    harq_tb1 = random.randint(0,6)
+                    harq_tb1 = random.randint(0,2)
 
                     mensagem = struct.pack('>BBHHHHBB', msg_Id,len_Ven,buff_Length, frame,num_of_harq, rnti, harq_tb1, harq_tb2)
                     conect_socket.sendto(mensagem, local)

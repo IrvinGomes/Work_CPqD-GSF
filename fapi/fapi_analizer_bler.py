@@ -25,6 +25,8 @@ valor_plot = 0  ##buffer inicial
 lista=deque([0]*x)
 flag_stop=False
 flag_plot=False
+cont_harq=0
+conta_amostras=0.0
 ################################################################################
 def delete():
   global lista, x
@@ -36,7 +38,7 @@ def delete():
 #		             conecta e manda para plota                        #
 ########################################################################
 def leitura():
-    global valor_plot, lista, flag, flag_stop
+    global valor_plot, lista, flag, flag_stop, conta_amostras, cont_harq
     ##########  conexao  ###############################################
     host=''
     port=8888
@@ -46,37 +48,23 @@ def leitura():
     ####################################################################
     ############## ----- configuracoes de leitura  ----- ###############
     while flag_stop == False:
+        leitor, recebe = udp.recvfrom(65535)
+        msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
+        conta_amostras +=1
+        if msg_Id is 133:
+            try:
+                msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+                ############################################################
+                ######### ----configuracoes de descompacta----- ############
+                Sfn=int(Frame) >> 4
+                Sf=int(Frame) & 0xF
 
-        contador = 0
-        cont_harq = 0
-        while contador<=99:
-            leitor, recebe = udp.recvfrom(65535)
-            msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
-            #print msg_Id
-            if msg_Id is 133:
-                #print msg_Id
-                try:
-                    msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
-                    ############################################################
-                    ######### ----configuracoes de descompacta----- ############
-                    Sfn=int(Frame) >> 4
-                    Sf=int(Frame) & 0xF
+                if (harq_tb1 is not 1):
+                    cont_harq +=1
 
-                    contador+=1
-
-                    if (harq_tb1 is not 1):
-                        cont_harq +=1
-
-                    if (contador==100):
-                        valor_plot=cont_harq/1
-                        flag=True
-                        #print valor_plot
-                    else:
-                        flag=False
-
-                except Exception as e:
-                    print ":".join("{:02x}".format(ord(c)) for c in leitor)
-                    raise
+            except Exception as e:
+                print ":".join("{:02x}".format(ord(c)) for c in leitor)
+                raise
 
 ################################################################################
 ################################################################################
@@ -176,7 +164,7 @@ class Packing(Tkinter.Frame):
 #                           Criacao  do grafico                                #
 ################################################################################
     def cria_grafi(self):
-        global lista, flag, x, flag_stop
+        global lista, flag, x, flag_stop, cont_harq, conta_amostras
         ########################################################################
         #                     Criacao do Grafico e Tollbar                     #
         ########################################################################
@@ -184,9 +172,9 @@ class Packing(Tkinter.Frame):
         ax = fig.add_axes([0.1,0.1,0.8,0.8])
         ax.grid(True)
         ax.set_title("RealTime plot FAPI - BLER INDICATION")
-        ax.set_xlabel("Time")
-        ax.set_ylabel("Amplitude")
-        ax.axis([0,1000,0,100])
+        ax.set_xlabel("Time em 0.5 segundos")
+        ax.set_ylabel("Amplitude(Porcentagem de perda)")
+        ax.axis([0,100,0,100])
         line, = pylab.plot(lista)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
@@ -194,17 +182,19 @@ class Packing(Tkinter.Frame):
         canvas.show()
         toolbar = NavigationToolbar2TkAgg( canvas, self.parent )
         toolbar.update()
-        canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+        canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1) 
         ########################################################################
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-        #for i in range(0,2):
-            #print 'flag graf', flag_stop
+            valor_plot = 100-((cont_harq/conta_amostras)*100)
             delete()
             lista.appendleft(valor_plot)
             line.set_ydata(lista)
             canvas.draw()
+            conta_amostras = 0.0
+            cont_harq = 0
+            time.sleep(0.5)
 ################################################################################
 ################################################################################
 
