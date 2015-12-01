@@ -7,6 +7,8 @@ import Tkinter
 from Tkinter import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 
+import tkMessageBox
+
 import matplotlib.pyplot as plt
 import time
 from collections import deque
@@ -19,9 +21,9 @@ import threading
 ################################################################################
 ################################################################################
 ################################################################################
-x=3000                   ##escala de x(tanto no deque quanto no grafico)
+x_linha=3000              ##escala de x(tanto no deque quanto no grafico)
 flag=False                ##flag que avisa quando completa o buffer
-valor_plot = 0  ##buffer inicial
+valor_plot_bler = 0            ##buffer inicial
 lista=deque([0]*x)
 flag_stop=False
 flag_plot=False
@@ -29,7 +31,7 @@ cont_harq=0
 conta_amostras=0.0
 ################################################################################
 def delete():
-  global lista, x
+  global lista, x_linha
   del lista[len(lista)-1]
 ################################################################################
 ################################################################################
@@ -37,8 +39,8 @@ def delete():
 ########################################################################
 #		             conecta e manda para plota                        #
 ########################################################################
-def leitura():
-    global valor_plot, lista, flag, flag_stop, conta_amostras, cont_harq
+def leitura_bler():
+    global valor_plot_bler, lista, flag, flag_stop, conta_amostras, cont_harq
     ##########  conexao  ###############################################
     host=''
     port=8888
@@ -46,7 +48,7 @@ def leitura():
     udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp.bind(local)
     ####################################################################
-    ############## ----- configuracoes de leitura  ----- ###############
+    ############## ----- configuracoes de leitura_bler_bler  ----- ###############
     while flag_stop == False:
         leitor, recebe = udp.recvfrom(65535)
         msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
@@ -122,7 +124,7 @@ class Packing(Tkinter.Frame):
         #packagesMenu.add_command(label="Vazio")
         #menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
         ########################################################################
-        helpMenu.add_command(label="About Program of Plot", underline=0)
+        helpMenu.add_command(label="About Program of Plot", underline=0, command=self.about)
         menubar.add_cascade(label="Help",underline=0, menu=helpMenu)
 ################################################################################
     #Criacao da UI2
@@ -131,12 +133,12 @@ class Packing(Tkinter.Frame):
         frame.pack(side=LEFT)
 
         self.b1=Button(frame, text='Encontrar UE',width=10)
-        self.b2=Button(frame, text='Adicionar UE ',width=10, )
-        self.b3=Button(frame, text='Plotar Grafico',width=10, command=self.thread_init)
+        self.b2=Button(frame, text='Plotar CQI ',width=10, )
+        self.b3=Button(frame, text='Plotar Bler',width=10, command=self.thread_init)
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
         #self.b1.pack()
-        #self.b2.pack()
+        self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
@@ -146,17 +148,30 @@ class Packing(Tkinter.Frame):
         if flag_plot == False:
             self.th = threading.Thread(target = self.cria_grafi)
             self.th.start()
-            flag_plot = True
+            #flag_plot = True
         else:
             pass
 
     def onExit(self):
         global flag_stop
         flag_stop = True
-        #print flag_stop
         time.sleep(1)
         self.parent.destroy()
         self.parent.quit()
+
+    def about(self):
+        top = Toplevel()
+        top.geometry("400x300")
+        top.title("About")
+
+        msg_about=Label(top, text="\nEste programa foi idealizado pela equipe de\n"
+                        "Software da Gerencia de Redes sem Fio do CPqD\n"
+                        "(Centro de Pesquisa e Desenvolvimento em Telecom)\n"
+                        "com o intuito de auxiliar e examinar os sinais\n"
+                        "e mensagens entre UE e eNodeB").pack()
+        msg_devol=Label(top, text="\nDesenvolvedor: Irvin R. Gomes").pack()
+        btn = Button(top,text = "   OK   ", command = destroy())
+        btn.pack()
 ################################################################################
 ################################################################################
 
@@ -182,14 +197,14 @@ class Packing(Tkinter.Frame):
         canvas.show()
         toolbar = NavigationToolbar2TkAgg( canvas, self.parent )
         toolbar.update()
-        canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1) 
+        canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
         ########################################################################
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-            valor_plot = 100-((cont_harq/conta_amostras)*100)
+            valor_plot_bler = 100-((cont_harq/conta_amostras)*100)
             delete()
-            lista.appendleft(valor_plot)
+            lista.appendleft(valor_plot_bler)
             line.set_ydata(lista)
             canvas.draw()
             conta_amostras = 0.0
@@ -202,8 +217,8 @@ class Packing(Tkinter.Frame):
 #                                    Main                                      #
 ################################################################################
 def main():
-    th_leitura=threading.Thread(target=leitura)
-    th_leitura.start()
+    th_leitura_bler=threading.Thread(target=leitura_bler)
+    th_leitura_bler.start()
     root=Tkinter.Tk()
     root.wm_title("FAPI Log Analyzer")
     app=Packing(root)
