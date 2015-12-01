@@ -1,3 +1,5 @@
+# -*- coding: cp1252 -*-
+
 import matplotlib.pyplot as plt
 #biblioteca de plotagem
 import numpy as np

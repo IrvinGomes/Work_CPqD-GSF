@@ -24,52 +24,18 @@ import threading
 x_linha=3000              ##escala de x(tanto no deque quanto no grafico)
 flag=False                ##flag que avisa quando completa o buffer
 valor_plot_bler = 0            ##buffer inicial
-lista=deque([0]*x)
+lista=deque([0]*x_linha)
 flag_stop=False
 flag_plot=False
-cont_harq=0
-conta_amostras=0.0
+cont_harq=1
+conta_amostras=1.0
 ################################################################################
 def delete():
   global lista, x_linha
   del lista[len(lista)-1]
 ################################################################################
 ################################################################################
-################################################################################
-########################################################################
-#		             conecta e manda para plota                        #
-########################################################################
-def leitura_bler():
-    global valor_plot_bler, lista, flag, flag_stop, conta_amostras, cont_harq
-    ##########  conexao  ###############################################
-    host=''
-    port=8888
-    local=(host, port)
-    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp.bind(local)
-    ####################################################################
-    ############## ----- configuracoes de leitura_bler_bler  ----- ###############
-    while flag_stop == False:
-        leitor, recebe = udp.recvfrom(65535)
-        msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
-        conta_amostras +=1
-        if msg_Id is 133:
-            try:
-                msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
-                ############################################################
-                ######### ----configuracoes de descompacta----- ############
-                Sfn=int(Frame) >> 4
-                Sf=int(Frame) & 0xF
 
-                if (harq_tb1 is not 1):
-                    cont_harq +=1
-
-            except Exception as e:
-                print ":".join("{:02x}".format(ord(c)) for c in leitor)
-                raise
-
-################################################################################
-################################################################################
 ################################################################################
 #                           Criacao da Classe                                  #
 ################################################################################
@@ -85,6 +51,7 @@ class Packing(Tkinter.Frame):
         self.initUI2()
 ################################################################################
 ################################################################################
+
 ################################################################################
 #                               Criacao da UI                                  #
 ################################################################################
@@ -146,9 +113,11 @@ class Packing(Tkinter.Frame):
     def thread_init(self):
         global flag_plot
         if flag_plot == False:
-            self.th = threading.Thread(target = self.cria_grafi)
-            self.th.start()
-            #flag_plot = True
+            self.th_leitura_bler=threading.Thread(target= self.leitura_bler)
+            self.th_leitura_bler.start()
+            self.th_cria_graf = threading.Thread(target = self.cria_grafi)
+            self.th_cria_graf.start()
+            flag_plot = True
         else:
             pass
 
@@ -168,10 +137,45 @@ class Packing(Tkinter.Frame):
                         "Software da Gerencia de Redes sem Fio do CPqD\n"
                         "(Centro de Pesquisa e Desenvolvimento em Telecom)\n"
                         "com o intuito de auxiliar e examinar os sinais\n"
-                        "e mensagens entre UE e eNodeB").pack()
+                        "e mensagens entre UE e eNodeB",width=10).pack()
         msg_devol=Label(top, text="\nDesenvolvedor: Irvin R. Gomes").pack()
-        btn = Button(top,text = "   OK   ", command = destroy())
-        btn.pack()
+        #btn = Button(top,text = "   OK   ", command = top.destroy())
+        #btn.pack()
+    ########################################################################
+    ########################################################################
+
+    ########################################################################
+    #		             conecta e manda para plota                        #
+    ########################################################################
+    def leitura_bler(self):
+        global valor_plot_bler, lista, flag, flag_stop, conta_amostras, cont_harq
+        ##########  conexao  ###############################################
+        host=''
+        port=8888
+        local=(host, port)
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        udp.bind(local)
+        ####################################################################
+        ######### ----- configuracoes de leitura_bler_bler  ----- ##########
+
+        while flag_stop == False:
+            leitor, recebe = udp.recvfrom(65535)
+            msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
+            conta_amostras +=1
+            if msg_Id is 133:
+                try:
+                    msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+                    ############################################################
+                    ######### ----configuracoes de descompacta----- ############
+                    Sfn=int(Frame) >> 4
+                    Sf=int(Frame) & 0xF
+
+                    if (harq_tb1 is not 1):
+                        cont_harq +=1
+
+                except Exception as e:
+                #    print ":".join("{:02x}".format(ord(c)) for c in leitor)
+                    raise
 ################################################################################
 ################################################################################
 
@@ -195,21 +199,24 @@ class Packing(Tkinter.Frame):
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
         canvas.show()
+
         toolbar = NavigationToolbar2TkAgg( canvas, self.parent )
         toolbar.update()
         canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+
         ########################################################################
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-            valor_plot_bler = 100-((cont_harq/conta_amostras)*100)
+            valor_plot_bler = (cont_harq/conta_amostras)*100
             delete()
             lista.appendleft(valor_plot_bler)
             line.set_ydata(lista)
             canvas.draw()
             conta_amostras = 0.0
             cont_harq = 0
-            time.sleep(0.5)
+            time.sleep(0.01)
+
 ################################################################################
 ################################################################################
 
@@ -217,8 +224,7 @@ class Packing(Tkinter.Frame):
 #                                    Main                                      #
 ################################################################################
 def main():
-    th_leitura_bler=threading.Thread(target=leitura_bler)
-    th_leitura_bler.start()
+
     root=Tkinter.Tk()
     root.wm_title("FAPI Log Analyzer")
     app=Packing(root)

@@ -1,3 +1,5 @@
+#!/bin/python2
+# -*- coding: cp1252 -*-
 import socket
 import time
 import struct
@@ -28,7 +30,7 @@ def conect(local):
 
                     mensagem = struct.pack('>BBHHHHBB', msg_Id,len_Ven,buff_Length, frame,num_of_harq, rnti, harq_tb1, harq_tb2)
                     conect_socket.sendto(mensagem, local)
-                    time.sleep(0.001)
+                    time.sleep(0.0001)
                     #print len(mensagem)
                 else:
                     msg_Id = 0x82
@@ -36,7 +38,7 @@ def conect(local):
                     frame = (sub_frame & 0x0F) | (sys_frame_n << 4)
                     mensagem = struct.pack('>BBHH', msg_Id,len_Ven,buff_Length, frame)
                     conect_socket.sendto(mensagem, local)
-                    time.sleep(0.001)
+                    time.sleep(0.0001)
 #                    print len(mensagem)
 def main():
     mensagem=''
