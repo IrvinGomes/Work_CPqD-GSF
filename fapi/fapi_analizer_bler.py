@@ -137,7 +137,7 @@ class Packing(Tkinter.Frame):
                         "Software da Gerencia de Redes sem Fio do CPqD\n"
                         "(Centro de Pesquisa e Desenvolvimento em Telecom)\n"
                         "com o intuito de auxiliar e examinar os sinais\n"
-                        "e mensagens entre UE e eNodeB",width=10).pack()
+                        "e mensagens entre UE e eNodeB",width=50).pack()
         msg_devol=Label(top, text="\nDesenvolvedor: Irvin R. Gomes").pack()
         #btn = Button(top,text = "   OK   ", command = top.destroy())
         #btn.pack()
@@ -161,8 +161,8 @@ class Packing(Tkinter.Frame):
         while flag_stop == False:
             leitor, recebe = udp.recvfrom(65535)
             msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
-            conta_amostras +=1
             if msg_Id is 133:
+                conta_amostras +=1
                 try:
                     msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
                     ############################################################
@@ -209,6 +209,7 @@ class Packing(Tkinter.Frame):
         ########################################################################
         while flag_stop == False:
             valor_plot_bler = (cont_harq/conta_amostras)*100
+            print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
             delete()
             lista.appendleft(valor_plot_bler)
             line.set_ydata(lista)
