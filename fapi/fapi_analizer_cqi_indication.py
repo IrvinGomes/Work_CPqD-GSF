@@ -32,47 +32,7 @@ def delete():
       del lista[len(lista)-1]
 ################################################################################
 ################################################################################
-################################################################################
-########################################################################
-#		             conecta e manda para plota                        #
-########################################################################
-def leitura():
-    global valor_plot, lista, flag, flag_stop
-    ##########  conexao  ###############################################
-    host=''
-    port=8888
-    local=(host, port)
-    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp.bind(local)
-    ####################################################################
-    ############## ----- configuracoes de leitura  ----- ###############
-    while flag_stop == False:
 
-        contador = 0
-        while contador<=24:
-            leitor, recebe = udp.recvfrom(65535)
-            msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
-            if msg_Id is 139:
-                try:
-                    sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
-                    ############################################################
-                    ######### ----configuracoes de descompacta----- ############
-                    #Sfn=int(sub_Frame) >> 4
-                    #Sf=int(sub_Frame) & 0xF
-                    valor_plot[contador]=ul_cqi#(ul_cqi-128)/2
-                    contador+=1
-
-                    if (contador==25):
-                        flag=True
-                    else:
-                        flag=False
-
-                except Exception as e:
-                    print ":".join("{:02x}".format(ord(c)) for c in leitor)
-                    raise
-
-################################################################################
-################################################################################
 ################################################################################
 #                           Criacao da Classe                                  #
 ################################################################################
@@ -105,30 +65,30 @@ class Packing(Tkinter.Frame):
         packagesMenu=Menu(menubar)
         ########################################################################
         menubar.add_cascade(label="File",underline=0, menu=fileMenu)
-        fileMenu.add_command(label="Encontrar UE", underline=10)
-        fileMenu.add_separator()
+        #fileMenu.add_command(label="Encontrar UE", underline=10)
+        #fileMenu.add_separator()
         fileMenu.add_command(label="Plotar", underline=0, command=self.thread_init)
         fileMenu.add_separator()
-        fileMenu.add_command(label="Salvar", underline=0)
-        fileMenu.add_command(label="Salvar como", underline=1)
-        fileMenu.add_separator()
+        #fileMenu.add_command(label="Salvar", underline=0)
+        #fileMenu.add_command(label="Salvar como", underline=1)
+        #fileMenu.add_separator()
         fileMenu.add_command(label="Exit", underline=0, command=self.onExit)
         ########################################################################
         submenu=Menu(fileMenu)
-        menubar.add_cascade(label="Edit",underline=0,menu=editMenu)
-        editMenu.add_cascade(label="Adicionar UE's", menu=submenu, underline=0)
-        submenu.add_command(label="UE")
+        #menubar.add_cascade(label="Edit",underline=0,menu=editMenu)
+        #editMenu.add_cascade(label="Adicionar UE's", menu=submenu, underline=0)
+        #submenu.add_command(label="UE")
         ########################################################################
-        viewMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="View",underline=0,menu=viewMenu)
+        #viewMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="View",underline=0,menu=viewMenu)
         ########################################################################
-        findMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="Find",underline=0,menu=findMenu)
+        #findMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="Find",underline=0,menu=findMenu)
         ########################################################################
-        packagesMenu.add_command(label="Vazio")
-        menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
+        #packagesMenu.add_command(label="Vazio")
+        #menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
         ########################################################################
-        helpMenu.add_command(label="About Program of Plot", underline=0)
+        helpMenu.add_command(label="About Program of Plot", underline=0, command=self.about)
         menubar.add_cascade(label="Help",underline=0, menu=helpMenu)
 ################################################################################
     #Criacao da UI2
@@ -141,8 +101,8 @@ class Packing(Tkinter.Frame):
         self.b3=Button(frame, text='Plotar Grafico',width=10, command=self.thread_init)
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
-        self.b1.pack()
-        self.b2.pack()
+        #self.b1.pack()
+        #self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
@@ -150,8 +110,10 @@ class Packing(Tkinter.Frame):
     def thread_init(self):
         global flag_plot
         if flag_plot == False:
-            self.th = threading.Thread(target = self.cria_grafi)
-            self.th.start()
+            self.th_leitura_cqi=threading.Thread(target= self.leitura_cqi)
+            self.th_leitura_cqi.start()
+            self.th_cria_graf = threading.Thread(target = self.cria_grafi)
+            self.th_cria_graf.start()
             flag_plot = True
         else:
             pass
@@ -159,13 +121,66 @@ class Packing(Tkinter.Frame):
     def onExit(self):
         global flag_stop
         flag_stop = True
-        #print flag_stop
         time.sleep(1)
         self.parent.destroy()
         self.parent.quit()
+
+    def about(self):
+        top = Toplevel()
+        top.geometry("400x300")
+        top.title("About")
+
+        msg_about=Label(top, text="\nEste programa foi idealizado pela equipe de\n"
+                        "Software da Gerencia de Redes sem Fio do CPqD\n"
+                        "(Centro de Pesquisa e Desenvolvimento em Telecom)\n"
+                        "com o intuito de auxiliar e examinar os sinais\n"
+                        "e mensagens entre UE e eNodeB",width=50).pack()
+        msg_devol=Label(top, text="\nDesenvolvedor: Irvin R. Gomes").pack()
+        #btn = Button(top,text = "   OK   ", command = top.destroy())
+        #btn.pack()
 ################################################################################
 ################################################################################
 
+########################################################################
+#		             conecta e manda para plota                        #
+########################################################################
+def leitura_cqi(self):
+    global valor_plot, lista, flag, flag_stop
+    ##########  conexao  ###############################################
+    host=''
+    port=8888
+    local=(host, port)
+    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    udp.bind(local)
+    ####################################################################
+    ############## ----- configuracoes de leitura  ----- ###############
+    while flag_stop == False:
+
+        contador = 0
+        while contador<=24:
+            leitor, recebe = udp.recvfrom(65535)
+            msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
+            if msg_Id is 139:
+                try:
+                    sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
+                    ############################################################
+                    ######### ----configuracoes de descompacta----- ############
+                    Sfn=int(sub_Frame) >> 4
+                    Sf=int(sub_Frame) & 0xF
+                    valor_plot[contador]=ul_cqi#(ul_cqi-128)/2
+                    contador+=1
+
+                    if (contador==25):
+                        flag=True
+                    else:
+                        flag=False
+
+                except Exception as e:
+                    #print ":".join("{:02x}".format(ord(c)) for c in leitor)
+                    raise
+
+################################################################################
+################################################################################
 ################################################################################
 #                           Criacao  do grafico                                #
 ################################################################################
@@ -206,8 +221,7 @@ class Packing(Tkinter.Frame):
 #                                    Main                                      #
 ################################################################################
 def main():
-    th_leitura=threading.Thread(target=leitura)
-    th_leitura.start()
+
     root=Tkinter.Tk()
     root.wm_title("FAPI Log Analyzer")
     app=Packing(root)

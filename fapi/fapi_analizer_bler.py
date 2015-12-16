@@ -7,8 +7,6 @@ import Tkinter
 from Tkinter import *
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
 
-import tkMessageBox
-
 import matplotlib.pyplot as plt
 import time
 from collections import deque
@@ -209,7 +207,7 @@ class Packing(Tkinter.Frame):
         ########################################################################
         while flag_stop == False:
             valor_plot_bler = (cont_harq/conta_amostras)*100
-            print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
+            #print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
             delete()
             lista.appendleft(valor_plot_bler)
             line.set_ydata(lista)
