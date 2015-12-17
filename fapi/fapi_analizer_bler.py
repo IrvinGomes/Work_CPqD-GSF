@@ -103,7 +103,7 @@ class Packing(Tkinter.Frame):
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
         #self.b1.pack()
-        self.b2.pack()
+        #self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
@@ -189,9 +189,11 @@ class Packing(Tkinter.Frame):
         ax = fig.add_axes([0.1,0.1,0.8,0.8])
         ax.grid(True)
         ax.set_title("RealTime plot FAPI - BLER INDICATION")
-        ax.set_xlabel("Time em 0.5 segundos")
-        ax.set_ylabel("Amplitude(Porcentagem de perda)")
-        ax.axis([0,100,0,100])
+        ax.set_xlabel("Tempo (em 0.5 segundos)")
+        ax.set_ylabel("Amplitude(em porcentagem)")
+        ax.axis([0,1000,0,100])
+
+
         line, = pylab.plot(lista)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
@@ -207,14 +209,28 @@ class Packing(Tkinter.Frame):
         ########################################################################
         while flag_stop == False:
             valor_plot_bler = (cont_harq/conta_amostras)*100
-            #print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
+
+            #texto_bler = 'Valor de bler:'
+            #ax.text(65, 95, '')
+            #ax.text(85, 95, '')
+            #ax.text(650, 95, texto_bler)
+            #ax.text(850, 95, valor_plot_bler)
+
+            #texto_amostras = 'Amostras / Harq:'
+            #ax.text(60,90, texto_amostras)
+            #ax.text(85,90, conta_amostras)
+            #ax.text(90,90.1, '/')
+            #ax.text(92,90, cont_harq)
+
+            print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
             delete()
             lista.appendleft(valor_plot_bler)
             line.set_ydata(lista)
+
             canvas.draw()
-            conta_amostras = 0.0
+            conta_amostras = 1.0
             cont_harq = 0
-            time.sleep(0.01)
+            time.sleep(0.05)
 
 ################################################################################
 ################################################################################
