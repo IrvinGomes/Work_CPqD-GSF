@@ -22,15 +22,26 @@ import threading
 x_linha=3000              ##escala de x(tanto no deque quanto no grafico)
 flag=False                ##flag que avisa quando completa o buffer
 valor_plot_bler = 0            ##buffer inicial
-lista=deque([0]*x_linha)
+valor_plot_cqi = range(0,25)
+lista_bler=deque([0]*x_linha)
+lista_cqi =deque([0]*x_linha)
+
 flag_stop=False
-flag_plot=False
+flag_leitura = False
+flag_plot_bler=False
+flag_plot_cqi =False
+
 cont_harq=1
 conta_amostras=1.0
 ################################################################################
-def delete():
-  global lista, x_linha
-  del lista[len(lista)-1]
+def delete_bler():
+  global lista_bler, x_linha
+  del lista_bler[len(lista_bler)-1]
+
+def delete_cqi():
+  global lista, x
+  for i in range(0,25):
+      del lista_cqi[len(lista_cqi)-1]
 ################################################################################
 ################################################################################
 
@@ -98,26 +109,34 @@ class Packing(Tkinter.Frame):
         frame.pack(side=LEFT)
 
         self.b1=Button(frame, text='Encontrar UE',width=10)
-        self.b2=Button(frame, text='Plotar CQI ',width=10, )
-        self.b3=Button(frame, text='Plotar Bler',width=10, command=self.thread_init)
+        self.b2=Button(frame, text='Plotar CQI ',width=10, command=lambda:self.thread_init(2))
+        self.b3=Button(frame, text='Plotar Bler',width=10, command=lambda:self.thread_init(1))
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
         #self.b1.pack()
-        #self.b2.pack()
+        self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
     #funcoes para os botoes
-    def thread_init(self):
-        global flag_plot
-        if flag_plot == False:
-            self.th_leitura_bler=threading.Thread(target= self.leitura_bler)
+    def thread_init(self, tipo_de_plot):
+        global flag_plot_bler, flag_leitura, flag_plot_cqi
+        if flag_leitura == False:
+            self.th_leitura_bler=threading.Thread(target= self.leitura)
             self.th_leitura_bler.start()
-            self.th_cria_graf = threading.Thread(target = self.cria_grafi)
-            self.th_cria_graf.start()
-            flag_plot = True
+            flag_leitura = True
         else:
             pass
+
+        if ((tipo_de_plot is 1)&(flag_plot_bler is False)):
+            self.th_cria_graf_bler = threading.Thread(target = self.cria_grafi_bler)
+            self.th_cria_graf_bler.start()
+            flag_plot_bler = True
+
+        if ((tipo_de_plot is 2)&(flag_plot_cqi is False)):
+            self.th_cria_graf_cqi = threading.Thread(target = self.cria_grafi_cqi)
+            self.th_cria_graf_cqi.start()
+            flag_plot_cqi = True
 
     def onExit(self):
         global flag_stop
@@ -137,16 +156,15 @@ class Packing(Tkinter.Frame):
                         "com o intuito de auxiliar e examinar os sinais\n"
                         "e mensagens entre UE e eNodeB",width=50).pack()
         msg_devol=Label(top, text="\nDesenvolvedor: Irvin R. Gomes").pack()
-        #btn = Button(top,text = "   OK   ", command = top.destroy())
-        #btn.pack()
+
     ########################################################################
     ########################################################################
 
     ########################################################################
     #		             conecta e manda para plota                        #
     ########################################################################
-    def leitura_bler(self):
-        global valor_plot_bler, lista, flag, flag_stop, conta_amostras, cont_harq
+    def leitura(self):
+        global lista_bler, lista_cqi, flag_stop, conta_amostras, cont_harq, valor_plot_cqi
         ##########  conexao  ###############################################
         host=''
         port=8888
@@ -154,25 +172,38 @@ class Packing(Tkinter.Frame):
         udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp.bind(local)
         ####################################################################
-        ######### ----- configuracoes de leitura_bler_bler  ----- ##########
-
+        ######### ----- configuracoes de leitura  ----- ##########
+        contador_cqi = 0
         while flag_stop == False:
             leitor, recebe = udp.recvfrom(65535)
             msg_Id,len_Ven,buff_Length, Frame=unpack('>BBHH', leitor[0:6])
+            ############################################################
+            ######### ----configuracoes de descompacta----- ############
+            Sfn=int(Frame) >> 4
+            Sf=int(Frame) & 0xF
+
             if msg_Id is 133:
                 conta_amostras +=1
                 try:
                     msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
-                    ############################################################
-                    ######### ----configuracoes de descompacta----- ############
-                    Sfn=int(Frame) >> 4
-                    Sf=int(Frame) & 0xF
-
                     if (harq_tb1 is not 1):
+                        print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq#, ' BLER: ', valor_plot_bler
                         cont_harq +=1
-
                 except Exception as e:
                 #    print ":".join("{:02x}".format(ord(c)) for c in leitor)
+                    raise
+
+            if msg_Id is 139:
+                try:
+                    sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
+                    valor_plot_cqi[contador_cqi]=ul_cqi
+                    contador_cqi += 1
+                    if contador is 25:
+                        flag_plot_cqi = True
+                        contador_cqi = 0
+                    else:
+                        flag_plot_cqi=False
+                except Exception as e:
                     raise
 ################################################################################
 ################################################################################
@@ -180,8 +211,8 @@ class Packing(Tkinter.Frame):
 ################################################################################
 #                           Criacao  do grafico                                #
 ################################################################################
-    def cria_grafi(self):
-        global lista, flag, x, flag_stop, cont_harq, conta_amostras
+    def cria_grafi_bler(self):
+        global valor_plot_cqi, lista_bler, flag, flag_stop, cont_harq, conta_amostras
         ########################################################################
         #                     Criacao do Grafico e Tollbar                     #
         ########################################################################
@@ -189,12 +220,12 @@ class Packing(Tkinter.Frame):
         ax = fig.add_axes([0.1,0.1,0.8,0.8])
         ax.grid(True)
         ax.set_title("RealTime plot FAPI - BLER INDICATION")
-        ax.set_xlabel("Tempo (em 0.5 segundos)")
+        ax.set_xlabel("Tempo (em 0,05 segundos)")
         ax.set_ylabel("Amplitude(em porcentagem)")
-        ax.axis([0,1000,0,100])
+        ax.axis([0,1200,0,100])
 
 
-        line, = pylab.plot(lista)
+        line, = pylab.plot(lista_bler)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
@@ -211,7 +242,6 @@ class Packing(Tkinter.Frame):
             #conta_amostras = 50
             #cont_harq = randint(300,500)
             valor_plot_bler = (cont_harq/conta_amostras)*100
-            print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
 
             #texto_bler = 'Valor de bler:'
             #ax.text(65, 95, '')
@@ -224,9 +254,10 @@ class Packing(Tkinter.Frame):
             #ax.text(90,90.1, '/')
             #ax.text(92,90, cont_harq)
 
-            delete()
-            lista.appendleft(valor_plot_bler)
-            line.set_ydata(lista)
+            #print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
+            delete_bler()
+            lista_bler.appendleft(valor_plot_bler)
+            line.set_ydata(lista_bler)
 
             canvas.draw()
             conta_amostras = 1.0
@@ -235,7 +266,33 @@ class Packing(Tkinter.Frame):
 
 ################################################################################
 ################################################################################
+    def cria_grafi_cqi(self):
+        global lista_cqi, flag_plot_cqi, flag_stop
+        fig = pylab.figure(2)
+        ax = fig.add_axes([0.1,0.1,0.8,0.8])
+        ax.grid(True)
+        ax.set_title("RealTime plot FAPI - CQI INDICATION")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Amplitude")
+        ax.axis([0,1000,100,180])
+        line, = pylab.plot(lista_cqi)
 
+        canvas = FigureCanvasTkAgg(fig, master=self.parent)
+        canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+        canvas.show()
+        toolbar = NavigationToolbar2TkAgg( canvas, self.parent )
+        toolbar.update()
+        canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+        ########################################################################
+        #                         Geracao do grafico                           #
+        ########################################################################
+        while flag_stop == False:
+        #for i in range(0,2):
+            #print 'flag graf', flag_stop
+            delete_cqi()
+            lista_cqi.appendleft(valor_plot_cqi)
+            line.set_ydata(lista_cqi)
+            canvas.draw()
 ################################################################################
 #                                    Main                                      #
 ################################################################################
