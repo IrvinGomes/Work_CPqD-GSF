@@ -19,10 +19,11 @@ import threading
 ################################################################################
 ################################################################################
 ################################################################################
-x_linha=3000              ##escala de x(tanto no deque quanto no grafico)
-flag=False                ##flag que avisa quando completa o buffer
-valor_plot_bler = 0            ##buffer inicial
-valor_plot_cqi = range(0,25)
+x_linha=3000                    ##escala de x(tanto no deque quanto no grafico)
+flag=False                      ##flag que avisa quando completa o buffer
+valor_plot_bler = 0             ##valor inicial para bler
+valor_plot_cqi = range(0,25)    ##buffer inicial para cqi
+
 lista_bler=deque([0]*x_linha)
 lista_cqi =deque([0]*x_linha)
 
@@ -39,7 +40,7 @@ def delete_bler():
   del lista_bler[len(lista_bler)-1]
 
 def delete_cqi():
-  global lista, x
+  global lista_cqi
   for i in range(0,25):
       del lista_cqi[len(lista_cqi)-1]
 ################################################################################
