@@ -183,23 +183,22 @@ class Packing(Tkinter.Frame):
             Sfn=int(Frame) >> 4
             Sf=int(Frame) & 0xF
 
-            if msg_Id is 133:
+            if msg_Id is 133 & tipo_de_plot is 1:
                 conta_amostras +=1
                 try:
                     msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
                     if (harq_tb1 is not 1):
-                        print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq#, ' BLER: ', valor_plot_bler
                         cont_harq +=1
                 except Exception as e:
                 #    print ":".join("{:02x}".format(ord(c)) for c in leitor)
                     raise
 
-            if msg_Id is 139:
+            if msg_Id is 139 & tipo_de_plot is 2:
                 try:
                     sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
                     valor_plot_cqi[contador_cqi]=ul_cqi
                     contador_cqi += 1
-                    if contador is 25:
+                    if contador_cqi is 25:
                         flag_plot_cqi = True
                         contador_cqi = 0
                     else:
@@ -269,8 +268,8 @@ class Packing(Tkinter.Frame):
 ################################################################################
     def cria_grafi_cqi(self):
         global lista_cqi, flag_plot_cqi, flag_stop
-        fig = pylab.figure(2)
-        ax = fig.add_axes([0.1,0.1,0.8,0.8])
+        fig2 = pylab.figure(2)
+        ax = fig2.add_axes([0.1,0.1,0.8,0.8])
         ax.grid(True)
         ax.set_title("RealTime plot FAPI - CQI INDICATION")
         ax.set_xlabel("Time")
@@ -278,7 +277,7 @@ class Packing(Tkinter.Frame):
         ax.axis([0,1000,100,180])
         line, = pylab.plot(lista_cqi)
 
-        canvas = FigureCanvasTkAgg(fig, master=self.parent)
+        canvas = FigureCanvasTkAgg(fig2, master=self.parent)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
         canvas.show()
         toolbar = NavigationToolbar2TkAgg( canvas, self.parent )

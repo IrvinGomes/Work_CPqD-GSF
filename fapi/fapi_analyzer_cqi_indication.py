@@ -144,40 +144,40 @@ class Packing(Tkinter.Frame):
 ########################################################################
 #		             conecta e manda para plota                        #
 ########################################################################
-def leitura_cqi(self):
-    global valor_plot, lista, flag, flag_stop
-    ##########  conexao  ###############################################
-    host=''
-    port=8888
-    local=(host, port)
-    udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    udp.bind(local)
-    ####################################################################
-    ############## ----- configuracoes de leitura  ----- ###############
-    while flag_stop == False:
+    def leitura_cqi(self):
+        global valor_plot, lista, flag, flag_stop
+        ##########  conexao  ###############################################
+        host=''
+        port=8888
+        local=(host, port)
+        udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        udp.bind(local)
+        ####################################################################
+        ############## ----- configuracoes de leitura  ----- ###############
+        while flag_stop == False:
 
-        contador = 0
-        while contador<=24:
-            leitor, recebe = udp.recvfrom(65535)
-            msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
-            if msg_Id is 139:
-                try:
-                    sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
-                    ############################################################
-                    ######### ----configuracoes de descompacta----- ############
-                    Sfn=int(sub_Frame) >> 4
-                    Sf=int(sub_Frame) & 0xF
-                    valor_plot[contador]=ul_cqi#(ul_cqi-128)/2
-                    contador+=1
+            contador = 0
+            while contador<=24:
+                leitor, recebe = udp.recvfrom(65535)
+                msg_Id,len_Ven,buff_Length=unpack('>BBH', leitor[0:4])
+                if msg_Id is 139:
+                    try:
+                        sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
+                        ############################################################
+                        ######### ----configuracoes de descompacta----- ############
+                        Sfn=int(sub_Frame) >> 4
+                        Sf=int(sub_Frame) & 0xF
+                        valor_plot[contador]=(ul_cqi-128)/2
+                        contador+=1
 
-                    if (contador==25):
-                        flag=True
-                    else:
-                        flag=False
+                        if (contador==25):
+                            flag=True
+                        else:
+                            flag=False
 
-                except Exception as e:
-                    #print ":".join("{:02x}".format(ord(c)) for c in leitor)
-                    raise
+                    except Exception as e:
+                        #print ":".join("{:02x}".format(ord(c)) for c in leitor)
+                        raise
 
 ################################################################################
 ################################################################################
@@ -186,6 +186,7 @@ def leitura_cqi(self):
 ################################################################################
     def cria_grafi(self):
         global lista, flag, x, flag_stop
+
         ########################################################################
         #                     Criacao do Grafico e Tollbar                     #
         ########################################################################
@@ -195,7 +196,7 @@ def leitura_cqi(self):
         ax.set_title("RealTime plot FAPI - CQI INDICATION")
         ax.set_xlabel("Time")
         ax.set_ylabel("Amplitude")
-        ax.axis([0,1000,100,180])
+        ax.axis([0,1000,0,100])
         line, = pylab.plot(lista)
 
         canvas = FigureCanvasTkAgg(fig, master=self.parent)
