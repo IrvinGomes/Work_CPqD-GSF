@@ -170,7 +170,7 @@ class Packing(Tkinter.Frame):
                         valor_plot[contador]=(ul_cqi-128)/2
                         contador+=1
 
-                        if (contador==25):
+                        if (contador==24):
                             flag=True
                         else:
                             flag=False

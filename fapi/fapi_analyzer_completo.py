@@ -22,13 +22,15 @@ import threading
 x_linha=3000                    ##escala de x(tanto no deque quanto no grafico)
 flag=False                      ##flag que avisa quando completa o buffer
 valor_plot_bler = 0             ##valor inicial para bler
-
+valor_plot_cqi = range(0,25)    ##buffer inicial para cqi
 
 lista_bler=deque([0]*x_linha)
+lista_cqi =deque([0]*x_linha)
 
 flag_stop=False
 flag_leitura = False
 flag_plot_bler=False
+flag_plot_cqi =False
 
 cont_harq=1
 conta_amostras=1.0
@@ -37,6 +39,10 @@ def delete_bler():
   global lista_bler, x_linha
   del lista_bler[len(lista_bler)-1]
 
+def delete_cqi():
+  global lista_cqi
+  for i in range(0,25):
+      del lista_cqi[len(lista_cqi)-1]
 ################################################################################
 ################################################################################
 
@@ -74,7 +80,7 @@ class Packing(Tkinter.Frame):
         menubar.add_cascade(label="File",underline=0, menu=fileMenu)
         #fileMenu.add_command(label="Encontrar UE", underline=10)
         #fileMenu.add_separator()
-        fileMenu.add_command(label="Plotar Bler", underline=0, command=self.thread_init)
+        fileMenu.add_command(label="Plotar", underline=0, command=self.thread_init)
         fileMenu.add_separator()
         #fileMenu.add_command(label="Salvar", underline=0)
         #fileMenu.add_command(label="Salvar como", underline=1)
@@ -109,22 +115,29 @@ class Packing(Tkinter.Frame):
         self.b4=Button(frame, text='Exit',width=10, command=self.onExit)
 
         #self.b1.pack()
-        #self.b2.pack()
+        self.b2.pack()
         self.b3.pack()
         self.b4.pack()
 ################################################################################
     #funcoes para os botoes
     def thread_init(self, tipo_de_plot):
-        global flag_plot_bler, flag_leitura
+        global flag_plot_bler, flag_leitura, flag_plot_cqi
         if flag_leitura == False:
             self.th_leitura_bler=threading.Thread(target= self.leitura)
             self.th_leitura_bler.start()
-            self.th_cria_graf_bler = threading.Thread(target = self.cria_grafi_bler)
-            self.th_cria_graf_bler.start()
             flag_leitura = True
-            flag_plot_bler = True
         else:
             pass
+
+        if ((tipo_de_plot is 1)&(flag_plot_bler is False)):
+            self.th_cria_graf_bler = threading.Thread(target = self.cria_grafi_bler)
+            self.th_cria_graf_bler.start()
+            flag_plot_bler = True
+
+        if ((tipo_de_plot is 2)&(flag_plot_cqi is False)):
+            self.th_cria_graf_cqi = threading.Thread(target = self.cria_grafi_cqi)
+            self.th_cria_graf_cqi.start()
+            flag_plot_cqi = True
 
     def onExit(self):
         global flag_stop
@@ -170,7 +183,7 @@ class Packing(Tkinter.Frame):
             Sfn=int(Frame) >> 4
             Sf=int(Frame) & 0xF
 
-            if msg_Id is 133 & tipo_de_plot is 1:
+            if msg_Id is 133 & flag_plot_bler is True:
                 conta_amostras +=1
                 try:
                     msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
@@ -180,6 +193,19 @@ class Packing(Tkinter.Frame):
                 #    print ":".join("{:02x}".format(ord(c)) for c in leitor)
                     raise
 
+            if msg_Id is 139 & flag_plot_cqi is True:
+                try:
+                    sub_Frame,num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
+
+                    valor_plot_cqi[contador_cqi]=(ul_cqi-128)/2
+                    contador_cqi += 1
+                    if contador_cqi is 24:
+                        flag_plot_cqi = True
+                        contador_cqi = 0
+                    else:
+                        flag_plot_cqi=False
+                except Exception as e:
+                    raise
 ################################################################################
 ################################################################################
 
@@ -214,8 +240,22 @@ class Packing(Tkinter.Frame):
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-
+            #conta_amostras = 50
+            #cont_harq = randint(300,500)
             valor_plot_bler = (cont_harq/conta_amostras)*100
+
+            #texto_bler = 'Valor de bler:'
+            #ax.text(65, 95, '')
+            #ax.text(85, 95, '')
+            #ax.text(650, 95, texto_bler)
+            #ax.text(850, 95, valor_plot_bler)
+            #texto_amostras = 'Amostras / Harq:'
+            #ax.text(60,90, texto_amostras)
+            #ax.text(85,90, conta_amostras)
+            #ax.text(90,90.1, '/')
+            #ax.text(92,90, cont_harq)
+
+            #print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
             delete_bler()
             lista_bler.appendleft(valor_plot_bler)
             line.set_ydata(lista_bler)
@@ -227,7 +267,33 @@ class Packing(Tkinter.Frame):
 
 ################################################################################
 ################################################################################
+    def cria_grafi_cqi(self):
+        global lista_cqi, flag_plot_cqi, flag_stop, x_linha
+        fig2 = pylab.figure(2)
+        ax2 = fig2.add_axes([0.1,0.1,0.8,0.8])
+        ax2.grid(True)
+        ax2.set_title("RealTime plot FAPI - CQI INDICATION")
+        ax2.set_xlabel("Time")
+        ax2.set_ylabel("Amplitude")
+        ax2.axis([0,1000,0,100])
+        line2, = pylab.plot(lista_cqi)
 
+        canvas2 = FigureCanvasTkAgg(fig2, master=self.parent)
+        canvas2.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+        canvas2.show()
+        toolbar2 = NavigationToolbar2TkAgg( canvas2, self.parent)
+        toolbar2.update()
+        canvas2._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
+        ########################################################################
+        #                         Geracao do grafico                           #
+        ########################################################################
+        while flag_stop == False:
+        #for i in range(0,2):
+            #print 'flag graf', flag_stop
+            delete_cqi()
+            lista_cqi.extendleft(valor_plot_cqi)
+            line2.set_ydata(lista_cqi)
+            canvas2.draw()
 ################################################################################
 #                                    Main                                      #
 ################################################################################
