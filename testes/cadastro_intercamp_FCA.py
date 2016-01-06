@@ -1,4 +1,5 @@
 import time
+import webbrowser
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -13,12 +14,13 @@ def init_driver():
 
 
 def lookup(driver, data):
-    ra="081641"
-    nome="Irvin Rodrigo Gomes"
-    email="irvin.alemao@gmail.com"
+    ra="081641"#"094786"
+    nome="Irvin Gomes"#"Gabriel Roma"
+    email="irvin.alemao@gmail.com"#"gabrielroma@gmail.com"
     motivo="Estágio / Bolsa"
 
     http="https://docs.google.com/forms/d/1N3RHDZDFuXoSHU5TWuAfYYSGeUCqEPeAJZYJ3FLU69g/viewform?formkey=dEQwUWtDNm81Z0hnQnpfay1NUGhZUlE6MQ&fromEmail=true"
+    #webbrowser.open_new(http)
     driver.get(http)
 
     try:
@@ -44,12 +46,12 @@ def lookup(driver, data):
 
 if __name__ == "__main__":
 
-    for ano in range(2015,2016):
-        for mes in range(12,13):
+    for ano in range(2016,2017):
+        for mes in range(1,3):
             for dia in range(1,32):
                 data=str(dia)+"/"+str(mes)+"/"+str(ano)
                 print('',data)
                 driver = init_driver()
                 lookup(driver, data)
-                time.sleep(1)
+                time.sleep(0.5)
                 driver.quit()
