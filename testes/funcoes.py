@@ -27,17 +27,17 @@
     #############################################333
 
 import sqlite3
-conn=sqlite3.connect('/home/estagiario/svn_irvin/impl/database/trunk/src/EnbDb.flash')
-cursor=conn.cursor()
+#conn=sqlite3.connect('/home/estagiario/svn_irvin/impl/database/trunk/src/EnbDb.flash')
+#cursor=conn.cursor()
 
-cursor.execute('SELECT * FROM EnbRachConfigCommon;')
-print('',cursor.fetchall())
-cursor.execute('SELECT * FROM EnbPhyPrach;')
-print('',cursor.fetchall())
-conn.close()
+#cursor.execute('SELECT szHwBasebandBoard FROM EnbInventory;')
+#print cursor.fetchall()
+#cursor.execute('SELECT * FROM EnbPhyPrach;')
+#print('',cursor.fetchall())
+#conn.close()
 
 
 update=sqlite3.connect('/home/estagiario/svn_irvin/impl/database/trunk/src/EnbDb.flash')
 cur=update.cursor()
 valor = int(input('novo valor: '))
-cursor.execute('UPDATE  EnbRachConfigCommon SET cNumberOfRaPreambles = ',(valor))
+cur.execute('UPDATE  EnbInventory SET liLastSwUpgradeTime = ',(valor))

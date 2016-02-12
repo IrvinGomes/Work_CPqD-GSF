@@ -24,8 +24,8 @@ flag=False                      ##flag que avisa quando completa o buffer
 valor_plot_bler = 0             ##valor inicial para bler
 valor_plot_cqi = range(0,25)    ##buffer inicial para cqi
 
-lista_bler=deque([0]*x_linha)
-lista_cqi =deque([0]*x_linha)
+lista_bler=deque([0]*x_linha)   ##lista circular de bler
+lista_cqi =deque([0]*x_linha)   ##lista circular de cqi
 
 flag_stop=False
 flag_leitura = False
@@ -72,35 +72,16 @@ class Packing(Tkinter.Frame):
 
         fileMenu=Menu(menubar)
         helpMenu=Menu(menubar)
-        editMenu=Menu(menubar)
-        viewMenu=Menu(menubar)
-        findMenu=Menu(menubar)
-        packagesMenu=Menu(menubar)
+
         ########################################################################
         menubar.add_cascade(label="File",underline=0, menu=fileMenu)
-        #fileMenu.add_command(label="Encontrar UE", underline=10)
-        #fileMenu.add_separator()
+
         fileMenu.add_command(label="Plotar", underline=0, command=self.thread_init)
         fileMenu.add_separator()
-        #fileMenu.add_command(label="Salvar", underline=0)
-        #fileMenu.add_command(label="Salvar como", underline=1)
-        #fileMenu.add_separator()
+
         fileMenu.add_command(label="Exit", underline=0, command=self.onExit)
         ########################################################################
         submenu=Menu(fileMenu)
-        #menubar.add_cascade(label="Edit",underline=0,menu=editMenu)
-        #editMenu.add_cascade(label="Adicionar UE's", menu=submenu, underline=0)
-        #submenu.add_command(label="UE")
-        ########################################################################
-        #viewMenu.add_command(label="Vazio")
-        #menubar.add_cascade(label="View",underline=0,menu=viewMenu)
-        ########################################################################
-        #findMenu.add_command(label="Vazio")
-        #menubar.add_cascade(label="Find",underline=0,menu=findMenu)
-        ########################################################################
-        #packagesMenu.add_command(label="Vazio")
-        #menubar.add_cascade(label="Packages",underline=0,menu=packagesMenu)
-        ########################################################################
         helpMenu.add_command(label="About Program of Plot", underline=0, command=self.about)
         menubar.add_cascade(label="Help",underline=0, menu=helpMenu)
 ################################################################################
@@ -240,22 +221,9 @@ class Packing(Tkinter.Frame):
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-            #conta_amostras = 50
-            #cont_harq = randint(300,500)
+
             valor_plot_bler = (cont_harq/conta_amostras)*100
 
-            #texto_bler = 'Valor de bler:'
-            #ax.text(65, 95, '')
-            #ax.text(85, 95, '')
-            #ax.text(650, 95, texto_bler)
-            #ax.text(850, 95, valor_plot_bler)
-            #texto_amostras = 'Amostras / Harq:'
-            #ax.text(60,90, texto_amostras)
-            #ax.text(85,90, conta_amostras)
-            #ax.text(90,90.1, '/')
-            #ax.text(92,90, cont_harq)
-
-            #print 'Amostras: ', conta_amostras, ' Harq is not 1: ', cont_harq, ' BLER: ', valor_plot_bler
             delete_bler()
             lista_bler.appendleft(valor_plot_bler)
             line.set_ydata(lista_bler)
@@ -288,8 +256,7 @@ class Packing(Tkinter.Frame):
         #                         Geracao do grafico                           #
         ########################################################################
         while flag_stop == False:
-        #for i in range(0,2):
-            #print 'flag graf', flag_stop
+
             delete_cqi()
             lista_cqi.extendleft(valor_plot_cqi)
             line2.set_ydata(lista_cqi)

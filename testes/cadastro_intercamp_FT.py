@@ -1,4 +1,10 @@
+#!/bin/python
 import time
+from datetime import datetime
+now = datetime.now()
+
+import datetime
+
 from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -19,7 +25,7 @@ def lookup(driver, data):
     ra="081641"
     nome="Irvin Gomes"
     email="irvin.alemao@gmail.com"
-    motivo="Estágio / Bolsa"
+    motivo="es"
 
     http="http://sistemas.ft.unicamp.br/onibus/"
     driver.get(http)
@@ -32,33 +38,61 @@ def lookup(driver, data):
         box2.send_keys(Keys.RETURN)
 
         ##entrou na pagina
-        box3 = driver.wait.until(EC.presence_of_element_located((By.NAME, "Solicitar")))
-        box3.click()
+        box3 = driver.wait.until(EC.presence_of_element_located((By.NAME, "motivo")))
+        box3.send_keys(motivo)
+        box3.send_keys(Keys.TAB)
+        box4 = driver.wait.until(EC.presence_of_element_located((By.NAME, "data_uso")))
+        box4.send_keys(data)
+        box4.send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.ENTER)
 
-        #box4 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000005")))
-        #box4.send_keys(motivo)
-        #box5 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000008")))
-        #box5.send_keys(data)
-        #box6 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000006")))
-        #box6.click()
-        #box7 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000007")))
-        #box7.click()
-        #box8 = driver.wait.until(EC.presence_of_element_located((By.NAME, "submit")))
-        #box8.click()
     except TimeoutException:
         print("Nao foi")
 
 
 def main():
-    for ano in range(2015,2016):
-        for mes in range(12,13):
-            for dia in range(18,32):
-                data=str(dia)+"/"+str(mes)+"/"+str(ano)
-                print('',data)
-                driver = init_driver()
-                lookup(driver, data)
-                time.sleep(0.5)
-                driver.quit()
+    Diasemana = ('segunda feira','terceira feira','quarta feira', 'quinta feira','sexta feira','sabado','domingo')
+    agora = datetime.date.today()
+    data = datetime.date.weekday(agora)
+    result=agora.strftime('%d/%m/%Y')
+########################################################################################################################
+#transforma data (nao precisa, isso é so para teste)
+    #data = datetime.date.weekday(agora - datetime.timedelta(days=2))
+    #agora = agora - datetime.timedelta(days=2)
+    #print(agora.strftime('%d/%m/%Y'))
+    #print(Diasemana[data])
+    #print('')
+########################################################################################################################
+
+    data2 = datetime.date.weekday(agora + datetime.timedelta(days=4))
+    agora2 = agora + datetime.timedelta(days=4)
+    print(agora2.strftime('%d/%m/%Y'))
+    print(Diasemana[data2])
+    print('')
+
+    if data2 is 5:
+        data = datetime.date.weekday(agora + datetime.timedelta(days=6))
+        agora = agora + datetime.timedelta(days=6)
+        result=agora.strftime('%d/%m/%Y')
+        #print(agora.strftime('%d/%m/%Y'))
+        #print(Diasemana[data])
+        #print('')
+        #print('vai mandar', result)
+        #print('')
+    if data2 is 6:
+        data = datetime.date.weekday(agora + datetime.timedelta(days=5))
+        agora = agora + datetime.timedelta(days=5)
+        result=agora.strftime('%d/%m/%Y')
+        #print(agora.strftime('%d/%m/%Y'))
+        #print(Diasemana[data])
+        #print('')
+        #print('vai mandar', result)
+        #print('')
+
+    print('vai mandar', result)
+    driver = init_driver()
+    lookup(driver, result)
+    time.sleep(0.5)
+    driver.quit()
 
 
 if __name__ == "__main__":
