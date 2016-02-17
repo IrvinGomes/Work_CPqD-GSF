@@ -4,8 +4,6 @@ from Tkinter import *
 import threading
 import time
 
-import Classes
-
 class Trd_teste(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
