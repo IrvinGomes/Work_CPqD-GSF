@@ -51,44 +51,65 @@ def lookup(driver, data):
 
 def main():
     Diasemana = ('segunda feira','terceira feira','quarta feira', 'quinta feira','sexta feira','sabado','domingo')
-    agora = datetime.date.today()
-    data = datetime.date.weekday(agora)
-    result=agora.strftime('%d/%m/%Y')
-########################################################################################################################
-#transforma data (nao precisa, isso é so para teste)
-    #data = datetime.date.weekday(agora - datetime.timedelta(days=2))
-    #agora = agora - datetime.timedelta(days=2)
-    #print(agora.strftime('%d/%m/%Y'))
-    #print(Diasemana[data])
-    #print('')
-########################################################################################################################
+    data = datetime.datetime.now()
+    dia = datetime.date.weekday(data)
 
-    data2 = datetime.date.weekday(agora + datetime.timedelta(days=4))
-    agora2 = agora + datetime.timedelta(days=4)
-    print(agora2.strftime('%d/%m/%Y'))
-    print(Diasemana[data2])
-    print('')
+    arquivo = open('teste.txt','r')
+    data = arquivo.read()
+    arquivo.close()
 
-    if data2 is 5:
-        data = datetime.date.weekday(agora + datetime.timedelta(days=6))
-        agora = agora + datetime.timedelta(days=6)
-        result=agora.strftime('%d/%m/%Y')
-        #print(agora.strftime('%d/%m/%Y'))
-        #print(Diasemana[data])
-        #print('')
-        #print('vai mandar', result)
-        #print('')
-    if data2 is 6:
-        data = datetime.date.weekday(agora + datetime.timedelta(days=5))
-        agora = agora + datetime.timedelta(days=5)
-        result=agora.strftime('%d/%m/%Y')
-        #print(agora.strftime('%d/%m/%Y'))
-        #print(Diasemana[data])
-        #print('')
-        #print('vai mandar', result)
-        #print('')
+    data = datetime.datetime.strptime(data, "%Y-%m-%d %H:%M:%S.%f")+ datetime.timedelta(days=1)
+    dia = datetime.date.weekday(data)
+
+
+    if dia < 5:
+        print(data.strftime('%d/%m/%Y'))
+        print(Diasemana[dia])
+        print()
+
+        result = data.strftime('%d/%m/%Y')
+
+
+        arquivo = open('teste.txt','w')
+        arquivo.write(str(data))
+        arquivo.close()
+
+    if dia is 5:
+        print(data.strftime('%d/%m/%Y'))
+        print(Diasemana[dia])
+        print()
+
+        dia = datetime.date.weekday(data + datetime.timedelta(days = 2))
+        data = data + datetime.timedelta(days=2)
+
+        print(data.strftime('%d/%m/%Y'))
+        print(Diasemana[dia])
+        result = data.strftime('%d/%m/%Y')
+        print()
+
+        arquivo = open('teste.txt','w')
+        arquivo.write(str(data))
+        arquivo.close()
+
+    if dia is 6:
+        print(data.strftime('%d/%m/%Y'))
+        print(Diasemana[dia])
+        print()
+
+        dia = datetime.date.weekday(data + datetime.timedelta(days = 1))
+        data = data + datetime.timedelta(days=1)
+
+        print(data.strftime('%d/%m/%Y'))
+        print(Diasemana[dia])
+        result = data.strftime('%d/%m/%Y')
+        print()
+
+        arquivo = open('teste.txt','w')
+        arquivo.write(str(data))
+        arquivo.close()
 
     print('vai mandar', result)
+    print()
     driver = init_driver()
     lookup(driver, result)
     time.sleep(0.5)

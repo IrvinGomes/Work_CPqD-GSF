@@ -1,3 +1,6 @@
+#!/bin/python
+#   coding: utf-8
+
 import time
 import webbrowser
 from selenium import webdriver
@@ -8,15 +11,15 @@ from selenium.common.exceptions import TimeoutException
 
 
 def init_driver():
-    driver = webdriver.Firefox()
-    driver.wait = WebDriverWait(driver, 5)
+    driver = webdriver.PhantomJS("./home/estagiario/Templates/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
+    #driver.wait = WebDriverWait(driver, 5)
     return driver
 
 
 def lookup(driver, data):
-    ra="081641"#"094786"
-    nome="Irvin Gomes"#"Gabriel Roma"
-    email="irvin.alemao@gmail.com"#"gabrielroma@gmail.com"
+    ra="094786"#"081641"
+    nome="Gabriel Roma" #"Irvin Gomes"#
+    email="gabrielroma@gmail.com" #"irvin.alemao@gmail.com"#
     motivo="Estágio / Bolsa"
 
     http="https://docs.google.com/forms/d/1N3RHDZDFuXoSHU5TWuAfYYSGeUCqEPeAJZYJ3FLU69g/viewform?formkey=dEQwUWtDNm81Z0hnQnpfay1NUGhZUlE6MQ&fromEmail=true"
@@ -24,21 +27,24 @@ def lookup(driver, data):
     driver.get(http)
 
     try:
-        box1 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000000")))
+        #box1 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000000")))
+        #box1.send_keys(ra)
+
+        box1 = driver.find_element_by_name("entry.1000000")
         box1.send_keys(ra)
-        box2 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000001")))
+        box2 = driver.find_element_by_name("entry.1000001")
         box2.send_keys(nome)
-        box3 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000003")))
+        box3 = driver.find_element_by_name("entry.1000003")
         box3.send_keys(email)
-        box4 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000005")))
+        box4 = driver.find_element_by_name("entry.1000005")
         box4.send_keys(motivo)
-        box5 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000008")))
+        box5 = driver.find_element_by_name("entry.1000008")
         box5.send_keys(data)
-        box6 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000006")))
+        box6 = driver.find_element_by_name("entry.1000006")
         box6.click()
-        box7 = driver.wait.until(EC.presence_of_element_located((By.NAME, "entry.1000007")))
+        box7 = driver.find_element_by_name("entry.1000007")
         box7.click()
-        box8 = driver.wait.until(EC.presence_of_element_located((By.NAME, "submit")))
+        box8 = driver.find_element_by_name("submit")
         box8.click()
     except TimeoutException:
         print("Nao foi")
@@ -47,8 +53,8 @@ def lookup(driver, data):
 if __name__ == "__main__":
 
     for ano in range(2016,2017):
-        for mes in range(1,3):
-            for dia in range(1,32):
+        for mes in range(3,4):
+            for dia in range(1,2):
                 data=str(dia)+"/"+str(mes)+"/"+str(ano)
                 print('',data)
                 driver = init_driver()
