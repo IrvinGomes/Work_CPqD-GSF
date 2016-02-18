@@ -12,7 +12,9 @@ class Trd_teste(threading.Thread):
         self.state = threading.Condition()
 
     def run(self):
-        print 'thread iniciada'
+        while True:
+            print 'thread iniciada'
+            time.sleep(1)
 
     def stop(self):
         print 'thread cancelada'
@@ -42,9 +44,9 @@ class Tela(Tkinter.Frame):
         self.btn1 = Button(frame, text = 'inicia thread',width=10, command=lambda:self.thread_init())
         self.btn1.pack()
         self.btn2 = Button(frame, text = 'pause thread',width=10, command=lambda:self.thread_pause())
-        self.btn2.pack()
+        #self.btn2.pack()
         self.btn3 = Button(frame, text = 'resume thread',width=10, command=lambda:self.thread_resume())
-        self.btn3.pack()
+        #self.btn3.pack()
         self.btn4 = Button(frame, text = 'kill thread',width=10, command=lambda:self.thread_kill())
         self.btn4.pack()
 
