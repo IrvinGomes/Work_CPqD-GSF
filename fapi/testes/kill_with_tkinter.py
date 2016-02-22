@@ -13,21 +13,21 @@ class Trd_teste(threading.Thread):
 
     def run(self):
         while True:
-            print 'thread iniciada'
+            print( 'thread iniciada')
             time.sleep(1)
 
     def stop(self):
-        print 'thread cancelada'
+        print( 'thread cancelada')
         with self.state:
             self.stop = True
 
     def pause(self):
-        print 'thread pausada'
+        print( 'thread pausada')
         with self.state:
             self.pause = True
 
     def resume(self):
-        print 'thread retornada'
+        print( 'thread retornada')
         with self.state:
             self.pause = False
 
