@@ -7,7 +7,6 @@
 
 import Tkinter
 import window
-import plot
 
 def main():
 
