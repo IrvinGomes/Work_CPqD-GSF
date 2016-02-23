@@ -13,6 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
 
+data_save = datetime.datetime.now()
+
 def init_driver():
     driver = webdriver.Firefox()
     driver.wait = WebDriverWait(driver, 5)
@@ -20,6 +22,7 @@ def init_driver():
 
 
 def lookup(driver, data):
+    global data_save
     login="i081641"
     senha="irg094001"
     ra="081641"
@@ -46,16 +49,22 @@ def lookup(driver, data):
         box4.send_keys(Keys.TAB, Keys.TAB, Keys.TAB, Keys.ENTER)
 
     except TimeoutException:
+        arquivo = open('/home/estagiario/Documents/git_gsf/trunk/testes/teste.txt','w')
+        arquivo.write(str(data_save))
+        arquivo.close()
         print("Nao foi")
 
 
 def main():
+    global data_save
+
     Diasemana = ('segunda feira','terceira feira','quarta feira', 'quinta feira','sexta feira','sabado','domingo')
     data = datetime.datetime.now()
     dia = datetime.date.weekday(data)
 
-    arquivo = open('teste.txt','r')
+    arquivo = open('/home/estagiario/Documents/git_gsf/trunk/testes/teste.txt','r')
     data = arquivo.read()
+    data_save = data
     arquivo.close()
 
     data = datetime.datetime.strptime(data, "%Y-%m-%d %H:%M:%S.%f")+ datetime.timedelta(days=1)
@@ -70,7 +79,7 @@ def main():
         result = data.strftime('%d/%m/%Y')
 
 
-        arquivo = open('teste.txt','w')
+        arquivo = open('/home/estagiario/Documents/git_gsf/trunk/testes/teste.txt','w')
         arquivo.write(str(data))
         arquivo.close()
 
@@ -87,7 +96,7 @@ def main():
         result = data.strftime('%d/%m/%Y')
         print()
 
-        arquivo = open('teste.txt','w')
+        arquivo = open('/home/estagiario/Documents/git_gsf/trunk/testes/teste.txt','w')
         arquivo.write(str(data))
         arquivo.close()
 
@@ -104,7 +113,7 @@ def main():
         result = data.strftime('%d/%m/%Y')
         print()
 
-        arquivo = open('teste.txt','w')
+        arquivo = open('/home/estagiario/Documents/git_gsf/trunk/testes/teste.txt','w')
         arquivo.write(str(data))
         arquivo.close()
 
