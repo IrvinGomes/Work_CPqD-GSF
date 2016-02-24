@@ -61,7 +61,8 @@ class Window(Tkinter.Frame):
         time.sleep(0.5)
         self.th_plot.stop()
         self.th_leitura.stop()
-        self.parent.destroy()
+        self.parent.quit()
+        #self.parent.destroy()
 
     def init_plot(self):
         self.th_plot = Trd_plot()
