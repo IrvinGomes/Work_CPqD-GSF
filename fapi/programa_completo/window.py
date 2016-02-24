@@ -20,11 +20,16 @@ import socket
 from struct import *
 
 ################################################################################
-lista = deque([0*1000])
+lista_bler = deque([0]*1000)
+lista_media = deque([0]*1000)
+
+contador_harq=0
+contador_amostra=1
 import random
 def delete_item():
-    global lista
-    del lista[len(lista)-1]
+    global lista_bler, lista_media
+    del lista_bler[len(lista_bler)-1]
+    del lista_media[len(lista_media)-1]
 ################################################################################
 ##
 ## Criacao da UI principal
@@ -80,9 +85,9 @@ class Trd_plot(threading.Thread):
         self.state = threading.Condition()
 
     def run(self):
-        global parente, lista
-
-        self.parent = parente
+        #parente = parent de window
+        #lista_bler = deque (lista_bler circular de valores de line)
+        global parente, lista_bler, contador_harq, contador_amostra
 
         figura = pylab.figure(1)
         ax = figura.add_axes([0.1,0.1,0.8,0.8])
@@ -92,29 +97,39 @@ class Trd_plot(threading.Thread):
         ax.set_ylabel("ampl")
         ax.axis([0,1000,0,100])
 
-        line, = pylab.plot(lista)
+        line_bler, = pylab.plot(lista_bler)
+        line_media, = pylab.plot(lista_media, 'r')#lista_bler de media
 
-        canvas =  FigureCanvasTkAgg(figura, master=self.parent)
+        canvas =  FigureCanvasTkAgg(figura, master=parente)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
         canvas.show()
 
-        toolbar = NavigationToolbar2TkAgg(canvas, self.parent)
+        toolbar = NavigationToolbar2TkAgg(canvas, parente)
         toolbar.update()
         canvas._tkcanvas.pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
         ########################################################################
         #                         Geracao do grafico                           #
         ########################################################################
-        vai = 1
-        while vai is 1:
-            num = random.randint(0,100)
+        media = 0
+        while True:
+            valor_plot_bler = (contador_harq/contador_amostra)*100
+            ####################################################################
+            soma = 0
+            for v in lista_bler:
+                soma +=v
+            media = (soma)/len(lista_bler)
+            ####################################################################
+
             delete_item()
 
-            lista.appendleft(num)
+            lista_bler.appendleft(valor_plot_bler)
+            lista_media.appendleft(media)
 
-            line.set_ydata(lista)
-            print lista
+            print lista_bler
+            line_media.set_ydata(lista_media)
+            line_bler.set_ydata(lista_bler)
             canvas.draw()
-            time.sleep(1)
+            time.sleep(0.01)
 
 ################################################################################
     def stop(self):
@@ -136,6 +151,7 @@ class Trd_leitura(threading.Thread):
         self.state  = threading.Condition()
 
     def run(self):
+        global contador_harq, contador_amostra
         ##########  conexao  ###############################################
         host=''
         port=8888
@@ -143,8 +159,22 @@ class Trd_leitura(threading.Thread):
         udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp.bind(local)
         ####################################################################
-        leitor, recebe = udp.recvfrom(65535)
-        msg_Id,len_Ven,buff_Length,frame=unpack('>BBHH',leitor[0:6])
+        while True:
+            leitor, recebe = udp.recvfrom(65535)
+            msg_Id,len_Ven,buff_Length,frame=unpack('>BBHH',leitor[0:6])
+            ############################################################
+            ######### ----configuracoes de descompacta----- ############
+            Sfn=int(Frame) >> 4
+            Sf=int(Frame) & 0xF
+            if msg_Id is 133:
+                contador_amostra +=1
+                try:
+                    msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+                    if (harq_tb1 is not 1):
+                        contador_harq+=1
+
+                except Exception as e:
+                    raise
 
     def stop(self):
         with self.state:
