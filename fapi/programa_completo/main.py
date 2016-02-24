@@ -11,7 +11,7 @@ import window
 def main():
 
     root = Tkinter.Tk()
-    root.wm_title("Teste")
+    root.wm_title("Fapi Analyzer 2.0")
 
     app = window.Window(root)
 

@@ -66,7 +66,7 @@ class Window(Tkinter.Frame):
         menubar.add_cascade(label="File", underline=0, menu=fileMenu)
         fileMenu.add_command(label="Plot", underline=0, command=self.init_plot)
         fileMenu.add_command(label="Exit", underline=0, command=self.onExit)
-#################################FUNCOES########################################
+    #################################FUNCOES####################################
 
     def onExit(self):
         time.sleep(0.5)
@@ -80,6 +80,7 @@ class Window(Tkinter.Frame):
         self.th_plot.start()
         self.th_leitura = Trd_leitura()
         self.th_leitura.start()
+
 ################################################################################
 ##
 ## Criacao do Plot
@@ -87,7 +88,6 @@ class Window(Tkinter.Frame):
 ################################################################################
 ##############################CLASS_THREAD######################################
 ################################################################################
-
 class Trd_plot(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
@@ -104,14 +104,15 @@ class Trd_plot(threading.Thread):
         figura = pylab.figure(1)
         ax = figura.add_axes([0.1,0.1,0.8,0.8])
         ax.grid(True)
-        ax.set_title("Plot anything")
-        ax.set_xlabel("time")
-        ax.set_ylabel("ampl")
+
+        ax.set_title("Plot Bler")
+        ax.set_xlabel("Time - 0.5 segundos")
+        ax.set_ylabel("Amplitude - porcentagem")
         ax.axis([0,1000,0,100])
 
         line_bler, = pylab.plot(lista_bler)
         line_media, = pylab.plot(lista_media, 'r')#lista_bler de media
-        line_cqi, = pylab.plot(lista_cqi, 'g')#lista_cqi
+        #line_cqi, = pylab.plot(lista_cqi, 'g')#lista_cqi
 
         canvas =  FigureCanvasTkAgg(figura, master=parente)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
@@ -126,11 +127,14 @@ class Trd_plot(threading.Thread):
         media = 0
         while True:
             valor_plot_bler = (contador_harq/contador_amostra_bler)*100
+            #print 'Amostras: ', contador_amostra_bler, ' Harq is not 1: ', contador_harq, ' BLER: ', valor_plot_bler
             ####################################################################
             soma = 0
-            for v in lista_bler:
-                soma +=v
-            media = (soma)/len(lista_bler)
+            v = 0
+            for v in range(0,50):
+                soma += lista_bler[v]
+
+            media = (soma)/50
             ####################################################################
 
             delete_item()
@@ -138,20 +142,22 @@ class Trd_plot(threading.Thread):
             lista_bler.appendleft(valor_plot_bler)
             lista_media.appendleft(media)
 
-            if flag_plot_cqi is True:
-                delete_cqi()
-                lista_cqi.appendleft(valores_cqi)
-                line_cqi.set_ydata(lista_cqi)
-            else:
-                pass
+            #if flag_plot_cqi is True:
+            #    delete_cqi()
+            #    lista_cqi.appendleft(valores_cqi)
+            #    line_cqi.set_ydata(lista_cqi)
+            #else:
+            #    True
 
             line_media.set_ydata(lista_media)
             line_bler.set_ydata(lista_bler)
-
+            #print 'to aqui', valor_plot_bler
             canvas.draw()
-            time.sleep(0.01)
+            contador_amostra_bler = 1.0
+            contador_harq = 0
+            time.sleep(0.05)
 
-################################################################################
+    ############################################################################
     def stop(self):
         with self.state:
             self.stop = True
@@ -210,7 +216,7 @@ class Trd_leitura(threading.Thread):
                     ######### ----configuracoes de descompacta----- ############
                     Sfn=int(frame_cqi) >> 4
                     Sf=int(frame_cqi) & 0xF
-                    valores_cqi[contador]=(ul_cqi-128)/2
+                    valores_cqi[contador_amostra_cqi]=(ul_cqi-128)/2
                     if (contador_amostra_cqi is 49):
                         contador_amostra_cqi = 0
                         flag_plot_cqi = True
