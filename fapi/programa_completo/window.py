@@ -162,14 +162,14 @@ class Trd_leitura(threading.Thread):
         while True:
             leitor, recebe = udp.recvfrom(65535)
             msg_Id,len_Ven,buff_Length,frame=unpack('>BBHH',leitor[0:6])
-            ############################################################
-            ######### ----configuracoes de descompacta----- ############
-            Sfn=int(Frame) >> 4
-            Sf=int(Frame) & 0xF
             if msg_Id is 133:
                 contador_amostra +=1
                 try:
                     msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+                    ############################################################
+                    ######### ----configuracoes de descompacta----- ############
+                    Sfn=int(Frame) >> 4
+                    Sf=int(Frame) & 0xF
                     if (harq_tb1 is not 1):
                         contador_harq+=1
 
