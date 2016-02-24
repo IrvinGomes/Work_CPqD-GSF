@@ -125,7 +125,7 @@ class Trd_plot(threading.Thread):
             lista_bler.appendleft(valor_plot_bler)
             lista_media.appendleft(media)
 
-            print lista_bler
+            #print lista_bler
             line_media.set_ydata(lista_media)
             line_bler.set_ydata(lista_bler)
             canvas.draw()
