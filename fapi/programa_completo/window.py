@@ -19,17 +19,28 @@ from collections import deque
 import socket
 from struct import *
 
+#import random
+################################################################################
+lista_media = deque([0]*1000)
+################################################################################
+lista_cqi = deque([0]*1000)
+valores_cqi = deque([0]*50)
+contador_amostra_cqi = 0
+flag_plot_cqi = False
 ################################################################################
 lista_bler = deque([0]*1000)
-lista_media = deque([0]*1000)
-
 contador_harq=0
-contador_amostra=1
-import random
+contador_amostra_bler=1
+################################################################################
 def delete_item():
     global lista_bler, lista_media
     del lista_bler[len(lista_bler)-1]
     del lista_media[len(lista_media)-1]
+
+def delete_cqi():
+    global lista_cqi
+    for i in range(0,50):
+        del lista_cqi[len(lista_cqi)-1]
 ################################################################################
 ##
 ## Criacao da UI principal
@@ -88,7 +99,7 @@ class Trd_plot(threading.Thread):
     def run(self):
         #parente = parent de window
         #lista_bler = deque (lista_bler circular de valores de line)
-        global parente, lista_bler, contador_harq, contador_amostra
+        global parente, lista_bler, contador_harq, contador_amostra_bler
 
         figura = pylab.figure(1)
         ax = figura.add_axes([0.1,0.1,0.8,0.8])
@@ -100,6 +111,7 @@ class Trd_plot(threading.Thread):
 
         line_bler, = pylab.plot(lista_bler)
         line_media, = pylab.plot(lista_media, 'r')#lista_bler de media
+        line_cqi, = pylab.plot(lista_cqi, 'g')#lista_cqi
 
         canvas =  FigureCanvasTkAgg(figura, master=parente)
         canvas.get_tk_widget().pack(side=Tkinter.TOP, fill=Tkinter.BOTH, expand=1)
@@ -113,7 +125,7 @@ class Trd_plot(threading.Thread):
         ########################################################################
         media = 0
         while True:
-            valor_plot_bler = (contador_harq/contador_amostra)*100
+            valor_plot_bler = (contador_harq/contador_amostra_bler)*100
             ####################################################################
             soma = 0
             for v in lista_bler:
@@ -126,9 +138,16 @@ class Trd_plot(threading.Thread):
             lista_bler.appendleft(valor_plot_bler)
             lista_media.appendleft(media)
 
-            #print lista_bler
+            if flag_plot_cqi is True:
+                delete_cqi()
+                lista_cqi.appendleft(valores_cqi)
+                line_cqi.set_ydata(lista_cqi)
+            else:
+                pass
+
             line_media.set_ydata(lista_media)
             line_bler.set_ydata(lista_bler)
+
             canvas.draw()
             time.sleep(0.01)
 
@@ -153,7 +172,10 @@ class Trd_leitura(threading.Thread):
         self.state  = threading.Condition()
 
     def run(self):
-        global contador_harq, contador_amostra
+        #globais de bler
+        global contador_harq, contador_amostra_bler
+        #globais de cqi
+        global contador_amostra_cqi, flag_plot_cqi
         ##########  conexao  ###############################################
         host=''
         port=8888
@@ -164,16 +186,36 @@ class Trd_leitura(threading.Thread):
         while True:
             leitor, recebe = udp.recvfrom(65535)
             msg_Id,len_Ven,buff_Length,frame=unpack('>BBHH',leitor[0:6])
+            ############################################################
+            ############ ----configuracoes de bler----- ################
             if msg_Id is 133:
-                contador_amostra +=1
+                contador_amostra_bler +=1
                 try:
-                    msg_Id,len_Ven,buff_Length,Frame, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+                    msg_Id, len_Ven, buff_Length, frame_bler, num_of_harq, rnti, harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
                     ############################################################
                     ######### ----configuracoes de descompacta----- ############
-                    Sfn=int(Frame) >> 4
-                    Sf=int(Frame) & 0xF
+                    Sfn=int(frame_bler) >> 4
+                    Sf=int(frame_bler) & 0xF
                     if (harq_tb1 is not 1):
                         contador_harq+=1
+
+                except Exception as e:
+                    raise
+            ############################################################
+            ############ ----configuracoes de CQI ----- ################
+            if msg_Id is 139:
+                try:
+                    frame_cqi, num_of_cqi, handle, rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHLHHHHBB', leitor[4:22])
+                    ############################################################
+                    ######### ----configuracoes de descompacta----- ############
+                    Sfn=int(frame_cqi) >> 4
+                    Sf=int(frame_cqi) & 0xF
+                    valores_cqi[contador]=(ul_cqi-128)/2
+                    if (contador_amostra_cqi is 49):
+                        contador_amostra_cqi = 0
+                        flag_plot_cqi = True
+                    else:
+                        flag_plot_cqi = False
 
                 except Exception as e:
                     raise
