@@ -134,6 +134,7 @@ class Trd_plot(threading.Thread):
 ################################################################################
     def stop(self):
         with self.state:
+            self.stop = True
             self._running=False
 
 ################################################################################
@@ -178,4 +179,5 @@ class Trd_leitura(threading.Thread):
 
     def stop(self):
         with self.state:
+            self.stop = True
             self._running=False
