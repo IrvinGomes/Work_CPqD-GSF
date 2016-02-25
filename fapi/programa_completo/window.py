@@ -236,8 +236,7 @@ class Trd_leitura(threading.Thread):
                         Sfn=int(frame_cqi) >> 4
                         Sf=int(frame_cqi) & 0xF
                         valores_cqi[contador_amostra_cqi]=(ul_cqi-128)/2
-                        if ul_cqi>180:
-                            print 'tem', ul_cqi
+
                         contador_amostra_cqi+=1
 
                         if (contador_amostra_cqi > 49):
