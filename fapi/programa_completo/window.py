@@ -20,19 +20,18 @@ import socket
 from struct import *
 #import random
 
-################################################################################
+###############################globais de media#################################
 lista_media = deque([0]*1000)
-################################################################################
+################################globais de cqi##################################
 lista_cqi = deque([0]*1000)
 valores_cqi = deque([0]*50)
 contador_amostra_cqi = 0
 flag_plot_cqi = False
-################################################################################
+###############################globais de bler##################################
 lista_bler = deque([0]*1000)
 contador_harq=0
 contador_amostra_bler=1
 ################################################################################
-
 def delete_item():
     global lista_bler, lista_media
     del lista_bler[len(lista_bler)-1]
@@ -42,7 +41,6 @@ def delete_cqi():
     global lista_cqi
     for i in range(0,50):
         del lista_cqi[len(lista_cqi)-1]
-
 ################################################################################
 ##
 ## Criacao da UI principal
