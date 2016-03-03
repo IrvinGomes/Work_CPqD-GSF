@@ -11,8 +11,8 @@ from selenium.common.exceptions import TimeoutException
 
 
 def init_driver():
-    driver = webdriver.PhantomJS("./home/estagiario/Templates/phantomjs-2.1.1-linux-x86_64/bin/phantomjs")
-    #driver.wait = WebDriverWait(driver, 5)
+    driver = webdriver.Firefox()
+    driver.wait = WebDriverWait(driver, 5)
     return driver
 
 
@@ -23,7 +23,7 @@ def lookup(driver, data):
     motivo="Estágio / Bolsa"
 
     http="https://docs.google.com/forms/d/1N3RHDZDFuXoSHU5TWuAfYYSGeUCqEPeAJZYJ3FLU69g/viewform?formkey=dEQwUWtDNm81Z0hnQnpfay1NUGhZUlE6MQ&fromEmail=true"
-    #webbrowser.open_new(http)
+    #webbrowser.open_new(http) isso abre o navegador padrao
     driver.get(http)
 
     try:
@@ -53,8 +53,8 @@ def lookup(driver, data):
 if __name__ == "__main__":
 
     for ano in range(2016,2017):
-        for mes in range(3,4):
-            for dia in range(1,2):
+        for mes in range(4,5):
+            for dia in range(1,31):
                 data=str(dia)+"/"+str(mes)+"/"+str(ano)
                 print('',data)
                 driver = init_driver()
