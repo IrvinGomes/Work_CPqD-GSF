@@ -22,20 +22,20 @@ def get_table_list(table_name):
 ##################################################################
 #             transformacao da string para um vetor int          #
 ##################################################################
-
-string = get_table_list('EnbRachConfigCommon')
-str1=str(string).replace("[(", "")
-str1=str(str1).replace(")]", "")
-#retira os elementos da string
-str2=str(str1).split(', ')
-##################################################################
-#             utiliza o tamanho de str2 para criar y             #
-##################################################################
-str3=range(len(str2))
+string = get_table_list('*')
+print string
+#str1=str(string).replace("[(", "")
+#str1=str(str1).replace(")]", "")
+##retira os elementos da string
+#str2=str(str1).split(', ')
+####################################################################
+##             utiliza o tamanho de str2 para criar y             #
+###################################################################
+#str3=range(len(str2))
 ##################################################################
 #                       criacao do grafico                       #
 ##################################################################
-x=str3
-y=str2
-plt.plot(x,y,'r')
-plt.show()
+#x=str3
+#y=str2
+#plt.plot(x,y,'r')
+#plt.show()
