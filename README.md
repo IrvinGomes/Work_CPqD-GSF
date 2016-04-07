@@ -1,4 +1,4 @@
-# CPqD-GSF
+# CPqD - Centro de Pesquisa e Desenvolvimento em Telecomunicações
 
 #CPqD:
 
