@@ -1,6 +1,6 @@
 # CPqD-GSF
 
-CPqD:
+#CPqD:
 
 NEGÓCIO Inovação e soluções em Tecnologias da Informação e Comunicação.
 
@@ -18,7 +18,7 @@ Atua com base:
 
 – na melhoria contínua dos seus processos; – no estímulo à criatividade individual e coletiva; – na relação harmoniosa entre seus colaboradores e com as partes interessadas; – na responsabilidade socioambiental; e – na permanente melhoria do seu desempenho financeiro, visando a sua perpetuidade.
 
-GTSF:
+#GTSF:
 
 O aumento do consumo de Internet em smartphones requer uma evolução constante das tecnologias de redes sem fio, especialmente na área da comunicação móvel.
 
