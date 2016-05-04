@@ -93,7 +93,7 @@ def main():
     local=(host, port)
 
     th1=threading.Thread(target=plota_graf)
-    #th1.start()
+    th1.start()
     th2=threading.Thread(target=leitura, args=(local,))
     th2.start()
     #th1.join()
