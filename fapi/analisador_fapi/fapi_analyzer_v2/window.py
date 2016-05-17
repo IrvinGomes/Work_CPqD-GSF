@@ -51,12 +51,21 @@ def delete_cqi():
 class Window(Tkinter.Frame):
     """docstring for Window"""
     def __init__(self, parent):
-        global parente
+        global parente, blers, cqis
 
         Tkinter.Frame.__init__(self, parent)
         self.parent = parent
         self.initUI()
         parente = self.parent
+
+        blers = IntVar()
+        bler_chk=Checkbutton(parente, text="On/Off - BLER", variable=blers)
+        bler_chk.pack()
+
+
+        cqis = IntVar()
+        cqi_chk=Checkbutton(parente,text="On/Off - CQI Indication",variable=cqis)
+        cqi_chk.pack()
 
     def initUI(self):
         menubar = Menu(self.parent)
@@ -129,9 +138,13 @@ class Trd_plot(threading.Thread):
         #                         Geracao do grafico                           #
         ########################################################################
         media = 0
+        global blers
         while True:
             valor_plot_bler = (contador_harq/contador_amostra_bler)*100
             #print 'Amostras: ', contador_amostra_bler, ' Harq is not 1: ', contador_harq, ' BLER: ', valor_plot_bler
+            plot_bler = blers.get()
+            if plot_bler is 0:
+                valor_plot_bler = 0
             ####################################################################
             soma = 0
             v = 0
@@ -203,6 +216,7 @@ class Trd_leitura(threading.Thread):
         ####################################################################
         while True:
             contador_amostra_cqi = 0
+            plot_cqi=cqis.get()
             while contador_amostra_cqi<50:
 
                 leitor, recebe = udp.recvfrom(65535)
@@ -233,9 +247,13 @@ class Trd_leitura(threading.Thread):
                         ######### ----configuracoes de descompacta----- ############
                         Sfn=int(frame_cqi) >> 4
                         Sf=int(frame_cqi) & 0xF
-                        valores_cqi[contador_amostra_cqi]=(ul_cqi-128)/2
+                        if plot_cqi is 0:
+                            valores_cqi[contador_amostra_cqi]=0
+                            contador_amostra_cqi+=1
 
-                        contador_amostra_cqi+=1
+                        else:
+                            valores_cqi[contador_amostra_cqi]=(ul_cqi-128)/2
+                            contador_amostra_cqi+=1
 
                         if (contador_amostra_cqi > 49):
                             flag_plot_cqi = True
