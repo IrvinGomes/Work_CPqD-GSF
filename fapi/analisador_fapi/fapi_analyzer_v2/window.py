@@ -21,6 +21,7 @@ from struct import *
 #import random
 
 ###############################globais de media#################################
+lista_bler_media = deque([0]*1000)
 lista_media = deque([0]*1000)
 ################################globais de cqi##################################
 lista_cqi = deque([0]*1000)
@@ -33,9 +34,10 @@ contador_harq=0
 contador_amostra_bler=1
 ################################################################################
 def delete_item():
-    global lista_bler, lista_media
+    global lista_bler, lista_media, lista_bler_media
     del lista_bler[len(lista_bler)-1]
     del lista_media[len(lista_media)-1]
+    del lista_bler_media[len(lista_bler_media)-1]
 
 def delete_cqi():
     global lista_cqi
@@ -58,16 +60,18 @@ class Window(Tkinter.Frame):
         self.initUI()
         parente = self.parent
 
-        blers = IntVar()
-        bler_chk=Checkbutton(parente, text="On/Off - BLER", variable=blers)
-        bler_chk.pack()
-
-
-        cqis = IntVar()
-        cqi_chk=Checkbutton(parente,text="On/Off - CQI Indication",variable=cqis)
-        cqi_chk.pack()
 
     def initUI(self):
+        global blers, cqis
+        blers = IntVar()
+        cqis = IntVar()
+
+        bler_chk=Checkbutton(self.parent, text="BLER", variable=blers)
+        cqi_chk=Checkbutton(self.parent,text="C Q I",variable=cqis)
+
+        bler_chk.pack()
+        cqi_chk.pack()
+
         menubar = Menu(self.parent)
         self.parent.config(menu=menubar)
 
@@ -75,6 +79,8 @@ class Window(Tkinter.Frame):
         menubar.add_cascade(label="File", underline=0, menu=fileMenu)
         fileMenu.add_command(label="Plot", underline=0, command=self.init_plot)
         fileMenu.add_command(label="Exit", underline=0, command=self.onExit)
+
+
     #################################FUNCOES####################################
 
     def onExit(self):
@@ -108,7 +114,7 @@ class Trd_plot(threading.Thread):
     def run(self):
         #parente = parent de window
         #lista_bler = deque (lista_bler circular de valores de line)
-        global parente, lista_bler, contador_harq, contador_amostra_bler
+        global parente, lista_bler, contador_harq, contador_amostra_bler, lista_bler_media
         global lista_cqi, flag_plot_cqi
         ########################################################################
         #                     Criacao do Grafico e Tollbar                     #
@@ -140,17 +146,19 @@ class Trd_plot(threading.Thread):
         media = 0
         global blers
         while True:
-            valor_plot_bler = (contador_harq/contador_amostra_bler)*100
-            #print 'Amostras: ', contador_amostra_bler, ' Harq is not 1: ', contador_harq, ' BLER: ', valor_plot_bler
             plot_bler = blers.get()
-            if plot_bler is 0:
-                valor_plot_bler = 0
+            valor_plot_bler = (contador_harq/contador_amostra_bler)*100
+            valor_plot_media = valor_plot_bler
+
             ####################################################################
             soma = 0
             v = 0
             for v in range(0,50):
-                soma += lista_bler[v]
-            media = (soma)/50
+                soma += lista_bler_media[v]
+                media = (soma)/50
+            ####################################################################
+            if plot_bler is 0:
+                valor_plot_bler = 0
             ####################################################################
             if flag_plot_cqi is True:
                 delete_cqi()
@@ -159,6 +167,7 @@ class Trd_plot(threading.Thread):
 
                 delete_item()
                 lista_bler.appendleft(valor_plot_bler)
+                lista_bler_media.appendleft(valor_plot_media)
                 lista_media.appendleft(media)
 
                 line_media.set_ydata(lista_media)
@@ -171,6 +180,7 @@ class Trd_plot(threading.Thread):
 
                 delete_item()
                 lista_bler.appendleft(valor_plot_bler)
+                lista_bler_media.appendleft(valor_plot_media)
                 lista_media.appendleft(media)
 
                 line_media.set_ydata(lista_media)
