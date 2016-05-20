@@ -35,7 +35,7 @@ char gc_enable_debug = FALSE;
 
 #define MAX_HOST_ADDR  	100
 
-#define DEFAULT_PORT 		"8023"
+#define DEFAULT_PORT 		"8888"
 #define MAX_BUF_SIZE 		1500
 
 #define MAX_DGRAM_SIZE 4096

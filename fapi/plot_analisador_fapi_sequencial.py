@@ -45,8 +45,8 @@ def leitura(local):
         #leitor=unpack('>B', leitor)[0:1]
         try:
             leitor, recebe = udp.recvfrom(12)
-            print len(leitor)
-            leitor=unpack('>BBHHHL', leitor)[0:6]
+            #print len(leitor)
+            leitor=unpack('>HHLHHHHBB', leitor)[0:6]
         except Exception as e:
             """leitor, recebe = udp.recvfrom(8)
             print len(leitor)
