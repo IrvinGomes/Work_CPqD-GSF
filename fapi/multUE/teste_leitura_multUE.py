@@ -46,7 +46,14 @@ while True:
   if msg_Id is 135: #133 -> harq
     num_of_pdu = unpack('>H', leitor[6:8])
     print num_of_pdu
-    
+
+    handle, rnti, length, data_offset, timing_advance = unpack('>lHHHH', leitor[8:20])
+
+    print "Handle:",handle
+    print "RNTI  :",rnti
+    print "Length:",length
+    print "Data  :",data_offset
+    print "Timing:",timing_advance
     #print msg_Id, len_Ven, buff_Length
 
     #msg_Id, len_Ven, buff_Length, frame_bler, num_of_harq, rnti,\
