@@ -47,20 +47,16 @@ while True:
     num_of_pdu = unpack('>H', leitor[6:8])
     print num_of_pdu
 
-    handle, rnti, length, data_offset, timing_advance = unpack('>lHHHH', leitor[8:20])
+    handle, rnti, length, data_offset, timing_advance = unpack('>LHHHH', leitor[8:20])
 
     print "Handle:",handle
     print "RNTI  :",rnti
     print "Length:",length
     print "Data  :",data_offset
     print "Timing:",timing_advance
-    #print msg_Id, len_Ven, buff_Length
 
-    #msg_Id, len_Ven, buff_Length, frame_bler, num_of_harq, rnti,\
-    #harq_tb1, harq_tb2 = unpack('>BBHHHHBB', leitor)
+if msg_Id is 139:
+  rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHHHBB', leitor[12:22]
 
-    #rnti = unpack('>H', leitor[8:10])
 
-    #harq_tb1 = unpack('>B',leitor[10:11])
-    #harq_tb2 = unpack('>B',leitor[11:12])
-    #print rnti, harq_tb1, harq_tb2
+  print rnti
