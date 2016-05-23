@@ -14,7 +14,7 @@ def conect(local):
         sub_frame = 0
         sys_frame_n = 0
         num_of_harq = 0
-        rnti = 0
+        rnti = 2
         harq_tb2 = 0
 
         for sys in range(0,1024):
