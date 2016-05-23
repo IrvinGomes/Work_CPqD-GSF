@@ -1,9 +1,35 @@
 import socket
 from struct import *
-
-# unpack:
-# B = 1
-# H = 2
+################################################################
+# UNPACK:
+################################################################
+#   BYTE ORDER              SIZE      ALIGNMENT
+#@ 	native 	                native 	  native
+#= 	native 	                standard 	none
+#< 	little-endian 	        standard 	none
+#> 	big-endian 	            standard 	none
+#! 	network (= big-endian) 	standard 	none
+################################################################
+#   C TYPE              PYTHON TYPE         SIZE NOTES
+#x 	pad byte 	          no value
+#c 	char 	              string of length    1 	   1
+#b 	signed char 	      integer 	          1 	   (3)
+#B 	unsigned char 	    integer 	          1 	   (3)
+#? 	_Bool 	            bool 	              1 	   (1)
+#h 	short 	            integer 	          2 	   (3)
+#H 	unsigned short 	    integer 	          2 	   (3)
+#i 	int 	              integer 	          4 	   (3)
+#I 	unsigned int 	      integer 	          4 	   (3)
+#l 	long 	              integer 	          4 	   (3)
+#L 	unsigned long 	    integer 	          4 	   (3)
+#q 	long long 	        integer 	          8 	   (2), (3)
+#Q 	unsigned long long 	integer 	          8 	   (2), (3)
+#f 	float 	            float 	            4 	   (4)
+#d 	double 	            float 	            8 	   (4)
+#s 	char[] 	            string
+#p 	char[] 	            string
+#P 	void * 	            integer 	  	             (5), (3)
+################################################################
 
 host =''
 port = 8888
@@ -20,6 +46,7 @@ while True:
   if msg_Id is 135: #133 -> harq
     num_of_pdu = unpack('>H', leitor[6:8])
     print num_of_pdu
+    
     #print msg_Id, len_Ven, buff_Length
 
     #msg_Id, len_Ven, buff_Length, frame_bler, num_of_harq, rnti,\
