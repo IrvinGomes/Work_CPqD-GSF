@@ -62,4 +62,5 @@ if msg_Id is 139:
 
   if rnti_1 != rnti_2:
     print rnti
+    
     rnti_2 = rnti_1
