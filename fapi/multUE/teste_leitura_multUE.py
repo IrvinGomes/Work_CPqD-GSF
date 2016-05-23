@@ -38,6 +38,8 @@ local = (host,port)
 udp=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 udp.bind(local)
 
+rnti_2 = 0
+
 while True:
   leitor, recebe = udp.recvfrom(65000)
 
@@ -56,7 +58,8 @@ while True:
     print "Timing:",timing_advance
 
 if msg_Id is 139:
-  rnti, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHHHBB', leitor[12:22]
+  rnti_1, length, data_offset, timming_advance, ul_cqi, ri =unpack('>HHHHBB', leitor[12:22]
 
-
-  print rnti
+  if rnti_1 != rnti_2:
+    print rnti
+    rnti_2 = rnti_1
